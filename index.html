@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>gondu. shoreline change · Maldives</title>
+<meta name="theme-color" content="#0c3b49">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230c3b49'/%3E%3Cg fill='none' stroke='%23a3ebe1' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M6 12c3-3 6 3 9 0s6 3 11 0'/%3E%3Cpath d='M6 18c3-3 6 3 9 0s6 3 11 0' opacity='.7'/%3E%3Cpath d='M6 24c3-3 6 3 9 0' opacity='.45'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/geotiff@2.1.3/dist-browser/geotiff.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.js"></script>
+<style>
+:root{
+  --paper:#eef4f4;--panel:#ffffff;--raise:#f2f7f7;--ink:#102e3b;--ink2:#55717e;--ink3:#8099a2;--line:#d6e3e5;--line2:#e7eff0;
+  --accent:#e0a66b;--accent-soft:#fff0df;--sea:#087e83;--sea-soft:#e2f4f2;--warn:#99591e;--warn-soft:#fff2df;--bad:#b3261e;--bad-soft:#fde8e6;
+  --acc:#0a9396;--ero:#d1495b;--mapbg:#badadd;
+  --shadow:0 10px 36px rgba(9,48,57,.11),0 1px 2px rgba(7,49,57,.06);
+  --font:'DM Sans',system-ui,-apple-system,sans-serif;--headfont:'Manrope','DM Sans',system-ui,sans-serif;color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --paper:#091d27;--panel:#102c38;--raise:#183844;--ink:#f2f9f9;--ink2:#b6ccd2;--ink3:#93b0b8;--line:#315260;--line2:#244553;
+  --accent:#f4b980;--accent-soft:#493524;--sea:#6ed9d0;--sea-soft:#193f44;--warn:#ffce8e;--warn-soft:#3d3429;--bad:#ff9a8f;--bad-soft:#4a2826;
+  --acc:#3fc1c0;--ero:#ff7a85;--mapbg:#123841;--shadow:0 12px 35px rgba(0,0,0,.3);color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);font:400 14px/1.45 var(--font);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;letter-spacing:-.006em;overflow:hidden}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0}
+a{color:var(--sea)}
+:focus-visible{outline:2px solid #efae6e;outline-offset:3px}
+::selection{background:#99e6dd;color:#0b3d46}
+svg.i{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.app{height:100dvh;display:grid;grid-template-rows:auto minmax(0,1fr)}
+
+/* ---- masthead ---- */
+.bar{position:relative;z-index:1000;display:flex;align-items:center;min-height:84px;padding:14px clamp(16px,2vw,30px);gap:clamp(12px,1.8vw,28px);background:var(--panel);border-bottom:1px solid var(--line);box-shadow:0 5px 22px rgba(10,49,60,.035)}
+.bar:before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#073c4d 0%,#0aa39f 54%,#eac28e 100%)}
+.brand{display:flex;gap:12px;color:var(--ink);align-items:center;text-decoration:none;flex:none}
+.brand svg{box-sizing:content-box;padding:10px;width:30px;height:30px;background:#0c3b49;border-radius:17px;color:#a3ebe1;stroke-width:2.3;box-shadow:0 5px 12px rgba(4,58,65,.17)}
+.brand-lockup{display:flex;flex-direction:column;gap:3px;white-space:nowrap}
+.brand-name{font:800 27px/1 var(--headfont);letter-spacing:-.075em}
+.brand-stop{color:#14aaa4}
+.brand-kicker{font-size:9px;font-weight:800;letter-spacing:.16em;color:var(--ink3)}
+.credit{font-size:11.5px;line-height:1.38;color:var(--ink2);border-left:1px solid var(--line);padding-left:clamp(12px,1.6vw,24px)}
+.credit b{display:block;color:var(--ink);font-size:13px;font-weight:700;letter-spacing:-.015em}
+.bar-end{margin-left:auto;display:flex;align-items:center;gap:9px}
+.seg{display:flex;gap:2px;border:1px solid var(--line);border-radius:10px;padding:3px;background:var(--raise)}
+.seg button{padding:7px 11px;border-radius:7px;color:var(--ink2);font-size:12px;font-weight:600;white-space:nowrap}
+.seg button[aria-pressed="true"]{background:#0a4a56;color:#fff;box-shadow:0 2px 6px rgba(9,59,69,.14)}
+.ib{width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--line);border-radius:10px;color:var(--ink2);flex:none}
+.ib:hover{color:var(--sea);background:var(--sea-soft)}
+.ib svg{width:16px;height:16px}
+
+/* ---- stage ---- */
+.stage{display:grid;grid-template-columns:350px minmax(0,1fr) auto;gap:10px;padding:10px;min-height:0}
+.side{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:auto;min-height:0;scrollbar-width:thin}
+.side-label{display:flex;align-items:center;gap:9px;padding:16px 18px 6px;font-size:9.5px;font-weight:800;letter-spacing:.14em;color:var(--ink3)}
+.side-label .n{color:var(--accent)}
+.side-label .count{margin-left:auto;letter-spacing:.06em;font-weight:700}
+.sect{padding:2px 18px 14px;border-bottom:1px solid var(--line2)}
+.sect:last-child{border-bottom:0}
+.help{font-size:12px;color:var(--ink2);margin:2px 0 8px}
+.fl{display:block;font-size:10.5px;font-weight:700;color:var(--ink3);margin:10px 0 4px;letter-spacing:.02em}
+.fl output{float:right;color:var(--ink);font-weight:700}
+.sel,.txt{width:100%;height:36px;padding:6px 10px;background:var(--raise);color:var(--ink);border:1px solid var(--line);border-radius:10px;font-weight:600;font-size:13px}
+.sel:hover,.txt:hover{border-color:var(--sea)}
+.row{display:flex;gap:7px;align-items:center}
+.row>*{flex:1;min-width:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:34px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--raise);color:var(--ink);font-size:12.5px;font-weight:700;white-space:nowrap}
+.btn:hover{border-color:var(--sea);color:var(--sea);background:var(--sea-soft)}
+.btn[aria-pressed="true"]{background:#0a4a56;color:#fff;border-color:#0a4a56}
+.btn.danger:hover{border-color:var(--bad);color:var(--bad);background:var(--bad-soft)}
+.btn.primary{height:44px;width:100%;background:#0a4a56;color:#fff;border-color:#0a4a56;font-size:14px;box-shadow:0 6px 16px rgba(9,59,69,.18)}
+.btn.primary:hover{background:#0b5a68;color:#fff}
+.btn.primary:disabled{opacity:.55;cursor:progress}
+.btn.small{height:28px;padding:0 9px;font-size:11.5px}
+input[type=range]{width:100%;accent-color:#0a7f84}
+.chk{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;margin-top:9px;color:var(--ink);cursor:pointer}
+.chk input{margin-top:3px;accent-color:#0a7f84}
+.regions{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.reg{display:grid;grid-template-columns:14px minmax(0,1fr) auto auto auto;gap:6px;align-items:center;padding:6px 7px;border:1px solid var(--line);border-radius:10px;background:var(--raise)}
+.reg .dot{width:12px;height:12px;border-radius:50%}
+.reg input{border:0;background:transparent;font-weight:700;font-size:12.5px;min-width:0;padding:2px 0}
+.reg .km{font-size:11px;color:var(--ink3);white-space:nowrap}
+.reg .km.big{color:var(--bad);font-weight:700}
+.reg button{width:24px;height:24px;border-radius:7px;color:var(--ink3);display:grid;place-items:center}
+.reg button:hover{background:var(--sea-soft);color:var(--sea)}
+.empty{font-size:12px;color:var(--warn);background:var(--warn-soft);padding:9px 11px;border-radius:10px}
+.status{font-size:12px;padding:9px 11px;border-radius:10px;margin-top:10px;white-space:pre-wrap;display:none}
+.status.info{display:block;background:var(--warn-soft);color:var(--warn)}
+.status.ok{display:block;background:var(--sea-soft);color:var(--sea)}
+.status.bad{display:block;background:var(--bad-soft);color:var(--bad)}
+.prog{height:6px;border-radius:6px;background:var(--line2);overflow:hidden;margin-top:10px;display:none}
+.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,#0a7f84,#e0a66b);transition:width .3s}
+.dl a,.dl button{display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;margin-top:6px;border:1px solid var(--line);border-radius:10px;background:var(--raise);color:var(--ink);text-decoration:none;font-size:12.5px;font-weight:700;text-align:left}
+.dl a:hover,.dl button:hover{border-color:var(--sea);color:var(--sea);background:var(--sea-soft)}
+.dl small{margin-left:auto;color:var(--ink3);font-weight:600}
+.about{font-size:12px;color:var(--ink2)}
+.about li{margin:0 0 5px 16px}
+.about p{margin-bottom:6px}
+
+/* ---- map ---- */
+.mapwrap{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);background:var(--mapbg);min-height:0}
+#map{position:absolute;inset:0;background:var(--mapbg)}
+#map.drawing{cursor:crosshair}
+.leaflet-container{font-family:var(--font)}
+.ovl{position:absolute;z-index:500}
+.atlas-index{left:58px;top:12px;display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(9,40,51,.82);color:#d9f5f1;border-radius:999px;font-size:9.5px;font-weight:800;letter-spacing:.14em;backdrop-filter:blur(6px)}
+.atlas-index .ping{width:7px;height:7px;border-radius:50%;background:#2ed3c6;box-shadow:0 0 0 3px rgba(46,211,198,.25)}
+.drawhint{left:50%;top:12px;transform:translateX(-50%);padding:8px 14px;background:var(--panel);color:var(--ink);border-radius:999px;font-size:12px;font-weight:700;box-shadow:var(--shadow);display:none}
+.legend{left:14px;bottom:18px;padding:12px 14px 10px;background:rgba(250,255,254,.97);border:1px solid rgba(24,79,88,.12);border-radius:13px;width:250px;box-shadow:0 8px 24px rgba(4,35,47,.16);color:#174653;display:none}
+.legend h4{font-size:9.5px;font-weight:800;letter-spacing:.12em;color:#67828b;margin:0 0 6px}
+.legend .sw{display:flex;align-items:center;gap:8px;font-size:11.5px;margin:3px 0}
+.legend .sw i{width:16px;height:10px;border-radius:3px}
+.legend .ramp{height:9px;border-radius:9px;margin-top:4px}
+.legend .ticks{display:flex;justify-content:space-between;font-size:10.5px;color:#66818a;margin-top:3px}
+.busy{left:50%;bottom:22px;transform:translateX(-50%);min-width:300px;max-width:80%;padding:10px 14px;background:rgba(9,40,51,.9);color:#e6fbf8;border-radius:12px;font-size:12px;display:none;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.busy .bp{height:4px;background:rgba(255,255,255,.15);border-radius:4px;margin-top:7px;overflow:hidden}
+.busy .bp i{display:block;height:100%;width:0;background:#2ed3c6;transition:width .3s}
+.busy button{float:right;color:#ffd7a8;font-weight:700;font-size:11px}
+.leaflet-image-layer.px{image-rendering:pixelated}
+.leaflet-control-layers{border-radius:12px!important;border:1px solid var(--line)!important;box-shadow:var(--shadow)!important;font-size:12px}
+.leaflet-control-layers-expanded{padding:8px 12px;max-height:60vh;overflow:auto}
+.leaflet-popup-content{font-family:var(--font);font-size:12px;margin:10px 12px}
+.chips{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px}
+.chips span{font-size:10px;font-weight:700;padding:2px 5px;border-radius:5px;color:#fff}
+
+/* ---- results ---- */
+.results{width:470px;display:none}
+.results.on{display:block}
+.res-head{position:relative;padding:16px 18px 12px;border-bottom:1px solid var(--line2)}
+.res-head:before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:16px 16px 0 0;background:linear-gradient(90deg,#073c4d 0%,#0aa39f 54%,#eac28e 100%)}
+.res-head h2{font:800 21px/1.1 var(--headfont);letter-spacing:-.04em;margin-top:3px}
+.res-head .meta{font-size:11.5px;color:var(--ink2);margin-top:5px}
+.res-head .x{position:absolute;right:12px;top:12px}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;padding:12px 14px 4px}
+.tile{border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:var(--raise)}
+.tile .k{font-size:8.5px;font-weight:800;letter-spacing:.12em;color:var(--ink3)}
+.tile .v{font:800 19px/1.15 var(--headfont);letter-spacing:-.03em;margin-top:3px}
+.tile .v small{font:600 10.5px var(--font);color:var(--ink3);margin-left:2px}
+.card{padding:6px 18px 16px;border-bottom:1px solid var(--line2)}
+.card:last-child{border-bottom:0}
+.card h3{display:flex;align-items:center;gap:8px;font-size:9.5px;font-weight:800;letter-spacing:.13em;color:var(--ink2);padding-top:12px}
+.card h3 .n{color:var(--accent)}
+.card h3 .png{margin-left:auto;font-size:10px;letter-spacing:.04em;color:var(--sea);font-weight:700}
+.card .sub{font-size:11.5px;color:var(--ink2);margin:3px 0 8px}
+.cbox{position:relative;height:250px}
+table.t{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:6px}
+table.t th{text-align:left;font-size:9.5px;letter-spacing:.06em;color:var(--ink3);font-weight:800;padding:6px 5px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.t td{padding:6px 5px;border-bottom:1px solid var(--line2);white-space:nowrap}
+table.t td.num{text-align:right}
+.pill{display:inline-block;padding:2px 7px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:.05em}
+.pill.ero{background:var(--bad-soft);color:var(--ero)}
+.pill.acc{background:var(--sea-soft);color:var(--acc)}
+.pill.sta{background:var(--raise);color:var(--ink2);border:1px solid var(--line)}
+.regpick{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
+.regpick button{padding:5px 10px;border-radius:999px;border:1px solid var(--line);font-size:11.5px;font-weight:700;color:var(--ink2);display:flex;align-items:center;gap:6px}
+.regpick button i{width:9px;height:9px;border-radius:50%}
+.regpick button[aria-pressed="true"]{background:#0a4a56;color:#fff;border-color:#0a4a56}
+.note{font-size:11px;color:var(--ink3);margin-top:6px}
+.warnline{font-size:11.5px;color:var(--warn);background:var(--warn-soft);padding:7px 10px;border-radius:9px;margin-top:8px}
+
+@media(max-width:1250px){.stage{grid-template-columns:320px minmax(0,1fr)}.results{grid-column:1/-1;width:auto}body{overflow:auto}.app{height:auto;min-height:100dvh}.mapwrap{height:74vh}.side.controls{max-height:74vh}}
+@media(max-width:820px){.stage{grid-template-columns:1fr}.credit{display:none}.bar{flex-wrap:wrap}.side.controls{max-height:none}.tiles{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<header class="bar">
+  <a class="brand" href="#" aria-label="gondu shoreline change">
+    <svg class="i" viewBox="0 0 30 30" aria-hidden="true"><path d="M3 10c4-4 8 4 12 0s8 4 12 0"/><path d="M3 17c4-4 8 4 12 0s8 4 12 0" opacity=".7"/><path d="M3 24c4-4 8 4 12 0" opacity=".45"/></svg>
+    <span class="brand-lockup"><span class="brand-name">gondu<span class="brand-stop">.</span></span><span class="brand-kicker">SHORELINE CHANGE / MALDIVES</span></span>
+  </a>
+  <div class="credit">
+    <b>Erosion and accretion of islands.</b>
+    Research Development Office, The Maldives National University<br>
+    Email : <a href="mailto:shuaib.rasheed@mnu.edu.mv">shuaib.rasheed@mnu.edu.mv</a>
+  </div>
+  <div class="bar-end">
+    <div class="seg" role="group" aria-label="Imagery source" id="srcSeg">
+      <button data-src="es" aria-pressed="true" title="Element 84 Earth Search on AWS">Earth Search</button>
+      <button data-src="pc" aria-pressed="false" title="Microsoft Planetary Computer">Planetary Computer</button>
+    </div>
+    <button class="ib" id="themeBtn" aria-label="Switch between light and dark"><svg class="i" viewBox="0 0 16 16"><path d="M8 1.5a6.5 6.5 0 1 0 6.5 6.5A5 5 0 0 1 8 1.5Z"/></svg></button>
+  </div>
+</header>
+
+<main class="stage">
+
+  <!-- ================= CONTROLS ================= -->
+  <aside class="side controls" aria-label="Settings">
+    <div class="side-label"><span class="n">01</span> REGIONS TO COMPARE <span class="count" id="regCount"></span></div>
+    <div class="sect">
+      <p class="help">Draw one box or polygon per area — an island, a beach, a reclamation. Each region gets its own rates so you can compare them.</p>
+      <div class="row">
+        <button class="btn" id="drawRect"><svg class="i" viewBox="0 0 16 16" width="14"><rect x="2.5" y="3.5" width="11" height="9" rx="1"/></svg>Box</button>
+        <button class="btn" id="drawPoly"><svg class="i" viewBox="0 0 16 16" width="14"><path d="M3 12 2.5 5.5 8 2l5.5 4-2 7Z"/></svg>Polygon</button>
+        <button class="btn danger" id="clearRegs">Clear all</button>
+      </div>
+      <label class="fl" for="preset">Or quick-add a known island (approximate box)</label>
+      <select class="sel" id="preset"><option value="">Add a preset region…</option></select>
+      <div class="row" style="margin-top:7px">
+        <label class="btn small" style="flex:1">Load GeoJSON<input type="file" id="loadGeo" accept=".geojson,.json" hidden></label>
+        <button class="btn small" id="saveGeo">Save regions</button>
+      </div>
+      <div class="regions" id="regList"></div>
+    </div>
+
+    <div class="side-label"><span class="n">02</span> PERIOD &amp; IMAGERY</div>
+    <div class="sect">
+      <label class="fl" for="sensor">Satellite</label>
+      <select class="sel" id="sensor">
+        <option value="s2">Sentinel-2 · 10 m · 2016 →</option>
+        <option value="ls">Landsat 5–9 · 30 m · 1990 → (Planetary Computer)</option>
+      </select>
+      <label class="fl">From · To · Step</label>
+      <div class="row">
+        <select class="sel" id="y0"></select>
+        <select class="sel" id="y1"></select>
+        <select class="sel" id="step"><option value="1">every year</option><option value="2">every 2 yrs</option><option value="5">every 5 yrs</option></select>
+      </div>
+      <label class="fl" for="season">Season used for each yearly composite</label>
+      <select class="sel" id="season">
+        <option value="1-12">Whole year</option>
+        <option value="12-4">NE monsoon · Iruvai (Dec–Apr)</option>
+        <option value="5-11">SW monsoon · Hulhangu (May–Nov)</option>
+      </select>
+      <label class="fl" for="cloud">Max scene cloud cover <output id="cloudV"></output></label>
+      <input type="range" id="cloud" min="5" max="90" step="5" value="50">
+      <label class="fl" for="nScenes">Clear scenes per year (median) <output id="nScenesV"></output></label>
+      <input type="range" id="nScenes" min="1" max="15" step="1" value="4">
+      <label class="fl" for="minClear">Min. clear sky over the region <output id="minClearV"></output></label>
+      <input type="range" id="minClear" min="30" max="100" step="5" value="70">
+    </div>
+
+    <div class="side-label"><span class="n">03</span> SHORELINE DETECTION</div>
+    <div class="sect">
+      <p class="help">These re-analyse instantly from the imagery already downloaded.</p>
+      <label class="fl" for="index">Water index</label>
+      <select class="sel" id="index">
+        <option value="ndwi">NDWI (green / NIR) — recommended</option>
+        <option value="mndwi">MNDWI (green / SWIR) — needs a new download</option>
+      </select>
+      <label class="chk"><input type="checkbox" id="otsu"> Automatic threshold (Otsu, per year)</label>
+      <label class="fl" for="thr">Land / water threshold (land is below it) <output id="thrV"></output></label>
+      <input type="range" id="thr" min="-0.3" max="0.3" step="0.01" value="0">
+      <label class="fl" for="sigma">Smoothing (Gaussian σ, pixels) <output id="sigmaV"></output></label>
+      <input type="range" id="sigma" min="0" max="3" step="0.25" value="1">
+      <label class="fl" for="minArea">Ignore patches smaller than <output id="minAreaV"></output></label>
+      <input type="range" id="minArea" min="0" max="3000" step="50" value="300">
+      <label class="chk"><input type="checkbox" id="chaikin" checked> Extra line smoothing (Chaikin)</label>
+      <label class="chk"><input type="checkbox" id="rgb" checked> Download true-colour images for first &amp; last year</label>
+    </div>
+
+    <div class="sect" style="padding-top:14px">
+      <button class="btn primary" id="runBtn">▶&nbsp; Run shoreline analysis</button>
+      <div class="prog" id="prog"><i></i></div>
+      <div class="status" id="status"></div>
+      <button class="btn" id="showRes" style="width:100%;margin-top:8px;display:none">Show results panel</button>
+    </div>
+
+    <div id="dlWrap" style="display:none">
+      <div class="side-label"><span class="n">04</span> DOWNLOADS</div>
+      <div class="sect dl" id="dl"></div>
+    </div>
+
+    <div class="side-label"><span class="n">i</span> HOW TO READ THE RESULTS</div>
+    <div class="sect about">
+      <ul>
+        <li>Imagery is free Sentinel-2 / Landsat surface reflectance, read directly from public cloud archives (Earth Search on AWS or Microsoft Planetary Computer). Everything is processed in your browser — no Earth Engine and no quota.</li>
+        <li>For each year the clearest scenes are cloud-masked and combined into a per-pixel median water index.</li>
+        <li>Shorelines are vector lines: the threshold contour of the smoothed index, traced with sub-pixel precision (marching squares). Region edges are never drawn as shoreline.</li>
+        <li>Erosion = land that became water; accretion = water that became land, between consecutive years.</li>
+        <li>Rates in m/yr are area-based: area change ÷ mean shoreline length ÷ years.</li>
+        <li>Imagery is not tide-corrected. Changes under ~1 pixel (10 m S2, 30 m Landsat) are within noise — check the true-colour layers.</li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- ================= MAP ================= -->
+  <section class="mapwrap" aria-label="Map">
+    <div id="map"></div>
+    <div class="ovl atlas-index" aria-hidden="true"><span class="ping"></span><span id="mapIdx">SENTINEL-2 · 10 M / MALDIVES</span></div>
+    <div class="ovl drawhint" id="drawHint"></div>
+    <div class="ovl legend" id="legend"></div>
+    <div class="ovl busy" id="busy"><button id="abortBtn">Stop</button><span id="busyTxt">Working…</span><div class="bp"><i id="busyBar"></i></div></div>
+  </section>
+
+  <!-- ================= RESULTS ================= -->
+  <aside class="side results" id="results" aria-label="Results"></aside>
+</main>
+</div>
+
+<script>
+'use strict';
+/* =====================================================================
+   gondu. — browser-only shoreline change explorer
+   Research Development Office, The Maldives National University
+   ===================================================================== */
+
+// ---------------- constants ----------------
+const THIS_YEAR = new Date().getFullYear();
+const REGION_COLORS = ['#087e83','#e0a66b','#5b3e96','#d1495b','#2f6fd0','#7a8b2e','#c2187a','#102e3b'];
+const YEAR_RAMP = ['#7e03a8','#cc4778','#f89540','#f0f921'];
+const MAX_PIX_REGION = 450000;     // ≈ 45 km² at 10 m, 400 km² at 30 m
+const MAX_PIX_TOTAL = 1200000;
+const MAX_COMPOSITES = 80;
+const PRESETS = {
+  'Hulhumalé (Kaafu)': [73.522, 4.196, 73.558, 4.246],
+  'Malé (Kaafu)': [73.496, 4.164, 73.526, 4.184],
+  'Thilafushi (Kaafu)': [73.412, 4.168, 73.456, 4.194],
+  'Gan (Addu)': [73.132, -0.706, 73.176, -0.678],
+  'Kadhdhoo (Laamu)': [73.508, 1.843, 73.532, 1.877]
+};
+const SOURCES = {
+  es: {name: 'Earth Search', search: 'https://earth-search.aws.element84.com/v1/search',
+       s2: ['sentinel-2-c1-l2a', 'sentinel-2-l2a'], ls: null,
+       bands: {s2: {green: 'green', nir: 'nir', swir: 'swir16', red: 'red', blue: 'blue', mask: 'scl'}}},
+  pc: {name: 'Planetary Computer', search: 'https://planetarycomputer.microsoft.com/api/stac/v1/search',
+       s2: ['sentinel-2-l2a'], ls: 'landsat-c2-l2', sign: true,
+       bands: {s2: {green: 'B03', nir: 'B08', swir: 'B11', red: 'B04', blue: 'B02', mask: 'SCL'},
+               ls: {green: 'green', nir: 'nir08', swir: 'swir16', red: 'red', blue: 'blue', mask: 'qa_pixel'}}}
+};
+const SENSOR = {s2: {res: 10, first: 2016, label: 'Sentinel-2'}, ls: {res: 30, first: 1990, label: 'Landsat'}};
+
+// ---------------- state ----------------
+const S = {
+  src: 'es', regions: [], nextId: 1, running: false, abort: false,
+  cache: new Map(),       // composite cache: key -> {idx, rgb, scenes, valid}
+  grids: new Map(),       // region grid cache: key -> grid
+  tiffs: new Map(),       // href -> Promise<GeoTIFF>
+  pcTokens: {},           // collection -> {token, t}
+  last: null,             // last downloaded set {regions:[{region, grid, years:[{year, comp}]}], cfg}
+  analysis: null, charts: [], overlays: [], layerCtl: null
+};
+
+// ---------------- small helpers ----------------
+const $ = id => document.getElementById(id);
+const fmt = (x, d = 1) => (x == null || !isFinite(x)) ? '–' : Number(x).toFixed(d);
+const signed = (x, d = 1) => (x == null || !isFinite(x)) ? '–' : (x > 0 ? '+' : '') + Number(x).toFixed(d);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+function hexLerp(a, b, t) {
+  const h = (s, i) => parseInt(s.substr(1 + 2 * i, 2), 16);
+  let o = '#';
+  for (let i = 0; i < 3; i++) o += Math.round(h(a, i) + (h(b, i) - h(a, i)) * t).toString(16).padStart(2, '0');
+  return o;
+}
+function rampColor(t) {
+  const n = YEAR_RAMP.length - 1, x = Math.max(0, Math.min(1, t)) * n, i = Math.min(Math.floor(x), n - 1);
+  return hexLerp(YEAR_RAMP[i], YEAR_RAMP[i + 1], x - i);
+}
+function safeName(s) { return String(s).replace(/[^A-Za-z0-9_-]+/g, '_').replace(/^_|_$/g, ''); }
+function store(k, v) { try { localStorage.setItem('gondu.' + k, JSON.stringify(v)); } catch (e) {} }
+function load(k, d) { try { const v = localStorage.getItem('gondu.' + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
+
+// ---------------- UTM (Krüger series, WGS84) ----------------
+const UTM = (() => {
+  const a = 6378137, f = 1 / 298.257223563, n = f / (2 - f), k0 = 0.9996;
+  const A = a / (1 + n) * (1 + n * n / 4 + n ** 4 / 64);
+  const al = [0, n / 2 - 2 * n * n / 3 + 5 * n ** 3 / 16, 13 * n * n / 48 - 3 * n ** 3 / 5, 61 * n ** 3 / 240];
+  const be = [0, n / 2 - 2 * n * n / 3 + 37 * n ** 3 / 96, n * n / 48 + n ** 3 / 15, 17 * n ** 3 / 480];
+  const de = [0, 2 * n - 2 * n * n / 3 - 2 * n ** 3, 7 * n * n / 3 - 8 * n ** 3 / 5, 56 * n ** 3 / 15];
+  const c = 2 * Math.sqrt(n) / (1 + n), D = Math.PI / 180;
+  function zoneOf(epsg) { const z = epsg % 100, south = Math.floor(epsg / 100) === 327; return {z, south, lon0: (z - 1) * 6 - 180 + 3}; }
+  function fwd(lon, lat, epsg) {
+    const Z = zoneOf(epsg), phi = lat * D, dl = (lon - Z.lon0) * D, s = Math.sin(phi);
+    const t = Math.sinh(Math.atanh(s) - c * Math.atanh(c * s));
+    const xi = Math.atan(t / Math.cos(dl)), eta = Math.atanh(Math.sin(dl) / Math.sqrt(1 + t * t));
+    let E = eta, N = xi;
+    for (let j = 1; j <= 3; j++) { E += al[j] * Math.cos(2 * j * xi) * Math.sinh(2 * j * eta); N += al[j] * Math.sin(2 * j * xi) * Math.cosh(2 * j * eta); }
+    return [500000 + k0 * A * E, (Z.south ? 10000000 : 0) + k0 * A * N];
+  }
+  function inv(E, N, epsg) {
+    const Z = zoneOf(epsg);
+    const xi = (N - (Z.south ? 10000000 : 0)) / (k0 * A), eta = (E - 500000) / (k0 * A);
+    let xp = xi, ep = eta;
+    for (let j = 1; j <= 3; j++) { xp -= be[j] * Math.sin(2 * j * xi) * Math.cosh(2 * j * eta); ep -= be[j] * Math.cos(2 * j * xi) * Math.sinh(2 * j * eta); }
+    const chi = Math.asin(Math.sin(xp) / Math.cosh(ep));
+    let phi = chi;
+    for (let j = 1; j <= 3; j++) phi += de[j] * Math.sin(2 * j * chi);
+    return [Z.lon0 + Math.atan(Math.sinh(ep) / Math.cos(xp)) / D, phi / D];
+  }
+  return {fwd, inv};
+})();
+
+// ---------------- geometry helpers ----------------
+function ringAreaKm2(ring) {      // ring [[lon,lat]...], local equirectangular
+  const lat0 = ring.reduce((s, p) => s + p[1], 0) / ring.length * Math.PI / 180;
+  const R = 6371.0088, k = Math.PI / 180;
+  let A = 0;
+  for (let i = 0; i < ring.length; i++) {
+    const p = ring[i], q = ring[(i + 1) % ring.length];
+    A += (p[0] * k * R * Math.cos(lat0)) * (q[1] * k * R) - (q[0] * k * R * Math.cos(lat0)) * (p[1] * k * R);
+  }
+  return Math.abs(A / 2);
+}
+function bboxOf(ring) {
+  let w = 1e9, s = 1e9, e = -1e9, n = -1e9;
+  ring.forEach(p => { w = Math.min(w, p[0]); e = Math.max(e, p[0]); s = Math.min(s, p[1]); n = Math.max(n, p[1]); });
+  return [w, s, e, n];
+}
+function pip(x, y, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1];
+    if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) inside = !inside;
+  }
+  return inside;
+}
+function geomContains(geom, pts) {
+  if (!geom) return true;
+  const polys = geom.type === 'Polygon' ? [geom.coordinates] : geom.type === 'MultiPolygon' ? geom.coordinates : null;
+  if (!polys) return true;
+  return pts.every(p => polys.some(poly => pip(p[0], p[1], poly[0])));
+}
+function signedArea(pts) {
+  let A = 0;
+  for (let i = 0, n = pts.length; i < n; i++) { const p = pts[i], q = pts[(i + 1) % n]; A += p[0] * q[1] - q[0] * p[1]; }
+  return A / 2;
+}
+
+// =====================================================================
+//  MAP + DRAWING
+// =====================================================================
+const map = L.map('map', {zoomControl: true, preferCanvas: false}).setView([4.215, 73.535], 13);
+const baseSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  {maxZoom: 19, attribution: 'Imagery © Esri, Maxar, Earthstar Geographics'}).addTo(map);
+const baseOsm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {maxZoom: 19, attribution: '© OpenStreetMap contributors'});
+const regionGroup = L.featureGroup().addTo(map);
+L.control.scale({imperial: false, position: 'bottomright'}).addTo(map);
+
+const draw = {mode: null, start: null, temp: null, pts: [], line: null, guide: null};
+function setDrawMode(mode) {
+  cancelDraw();
+  draw.mode = mode;
+  $('drawRect').setAttribute('aria-pressed', mode === 'rect');
+  $('drawPoly').setAttribute('aria-pressed', mode === 'poly');
+  $('map').classList.toggle('drawing', !!mode);
+  const hint = $('drawHint');
+  if (mode) {
+    hint.textContent = mode === 'rect' ? 'Click and drag to draw a box · Esc to cancel'
+                                       : 'Click to add corners · double-click or click the first point to finish · Esc to cancel';
+    hint.style.display = 'block';
+    map.doubleClickZoom.disable();
+  } else { hint.style.display = 'none'; map.doubleClickZoom.enable(); map.dragging.enable(); }
+}
+function cancelDraw() {
+  if (draw.temp) map.removeLayer(draw.temp);
+  if (draw.line) map.removeLayer(draw.line);
+  if (draw.guide) map.removeLayer(draw.guide);
+  Object.assign(draw, {mode: null, start: null, temp: null, pts: [], line: null, guide: null});
+  $('drawRect').setAttribute('aria-pressed', false);
+  $('drawPoly').setAttribute('aria-pressed', false);
+  $('map').classList.remove('drawing');
+  $('drawHint').style.display = 'none';
+  map.dragging.enable();
+  map.doubleClickZoom.enable();
+}
+map.on('mousedown', e => {
+  if (draw.mode !== 'rect') return;
+  map.dragging.disable();
+  draw.start = e.latlng;
+  draw.temp = L.rectangle([e.latlng, e.latlng], {color: '#e0a66b', weight: 2, dashArray: '5 4', fillOpacity: .08}).addTo(map);
+});
+map.on('mousemove', e => {
+  if (draw.mode === 'rect' && draw.start) draw.temp.setBounds([draw.start, e.latlng]);
+  if (draw.mode === 'poly' && draw.pts.length) {
+    const last = draw.pts[draw.pts.length - 1];
+    if (draw.guide) draw.guide.setLatLngs([last, e.latlng]);
+    else draw.guide = L.polyline([last, e.latlng], {color: '#e0a66b', weight: 1.5, dashArray: '4 4'}).addTo(map);
+  }
+});
+map.on('mouseup', e => {
+  if (draw.mode !== 'rect' || !draw.start) return;
+  const b = L.latLngBounds(draw.start, e.latlng);
+  map.removeLayer(draw.temp); draw.temp = null; draw.start = null;
+  map.dragging.enable();
+  if (Math.abs(b.getEast() - b.getWest()) < 1e-5 || Math.abs(b.getNorth() - b.getSouth()) < 1e-5) return;
+  addRegion([[b.getWest(), b.getSouth()], [b.getEast(), b.getSouth()], [b.getEast(), b.getNorth()], [b.getWest(), b.getNorth()]]);
+  setDrawMode(null);
+});
+map.on('click', e => {
+  if (draw.mode === 'poly') {
+    if (draw.pts.length >= 3) {
+      const p0 = map.latLngToContainerPoint(draw.pts[0]), p = map.latLngToContainerPoint(e.latlng);
+      if (p0.distanceTo(p) < 10) return finishPoly();
+    }
+    draw.pts.push(e.latlng);
+    if (draw.line) draw.line.setLatLngs(draw.pts);
+    else draw.line = L.polyline(draw.pts, {color: '#e0a66b', weight: 2}).addTo(map);
+    return;
+  }
+  if (!draw.mode) inspect(e.latlng);
+});
+map.on('dblclick', () => { if (draw.mode === 'poly' && draw.pts.length >= 3) finishPoly(); });
+function finishPoly() {
+  // double-click adds a duplicate last point; drop near-duplicates
+  const pts = draw.pts.filter((p, i, a) => i === 0 || p.distanceTo(a[i - 1]) > 0.5);
+  const ring = pts.map(p => [p.lng, p.lat]);
+  setDrawMode(null);
+  if (ring.length >= 3) addRegion(ring);
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') setDrawMode(null); });
+$('drawRect').onclick = () => setDrawMode(draw.mode === 'rect' ? null : 'rect');
+$('drawPoly').onclick = () => setDrawMode(draw.mode === 'poly' ? null : 'poly');
+
+// ---------------- regions ----------------
+function addRegion(ring, name, silent) {
+  const id = S.nextId++;
+  const color = REGION_COLORS[(S.regions.length) % REGION_COLORS.length];
+  const r = {id, ring, name: name || 'Region ' + id, color};
+  r.layer = L.polygon(ring.map(p => [p[1], p[0]]), {color: '#e0a66b', weight: 2.5, fillOpacity: 0.04, dashArray: '6 4'}).addTo(regionGroup);
+  r.layer.bindTooltip(() => esc(r.name), {sticky: true});
+  S.regions.push(r);
+  if (!silent) { renderRegions(); saveRegions(); }
+  return r;
+}
+function removeRegion(id) {
+  const i = S.regions.findIndex(r => r.id === id);
+  if (i < 0) return;
+  regionGroup.removeLayer(S.regions[i].layer);
+  S.regions.splice(i, 1);
+  renderRegions(); saveRegions();
+}
+function renderRegions() {
+  const el = $('regList');
+  $('regCount').textContent = S.regions.length ? S.regions.length + (S.regions.length === 1 ? ' REGION' : ' REGIONS') : '';
+  if (!S.regions.length) { el.innerHTML = '<div class="empty">No regions yet — draw one on the map or pick a preset.</div>'; return; }
+  const res = SENSOR[$('sensor').value].res;
+  el.innerHTML = '';
+  S.regions.forEach((r, i) => {
+    r.color = REGION_COLORS[i % REGION_COLORS.length];
+    const km2 = ringAreaKm2(r.ring), pix = km2 * 1e6 / (res * res);
+    const d = document.createElement('div');
+    d.className = 'reg';
+    d.innerHTML = `<span class="dot" style="background:${r.color}"></span>
+      <input value="${esc(r.name)}" aria-label="Region name">
+      <span class="km ${pix > MAX_PIX_REGION ? 'big' : ''}" title="${pix > MAX_PIX_REGION ? 'Too large — draw a tighter box' : ''}">${fmt(km2, 2)} km²</span>
+      <button title="Zoom to region"><svg class="i" viewBox="0 0 16 16" width="14"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg></button>
+      <button title="Remove region"><svg class="i" viewBox="0 0 16 16" width="13"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>`;
+    const [inp, , zb, xb] = [d.children[1], d.children[2], d.children[3], d.children[4]];
+    inp.oninput = () => { r.name = inp.value.trim() || 'Region ' + r.id; saveRegions(); };
+    zb.onclick = () => map.fitBounds(r.layer.getBounds(), {padding: [30, 30]});
+    xb.onclick = () => removeRegion(r.id);
+    el.appendChild(d);
+  });
+}
+function saveRegions() { store('regions', S.regions.map(r => ({ring: r.ring, name: r.name}))); }
+$('clearRegs').onclick = () => { S.regions.forEach(r => regionGroup.removeLayer(r.layer)); S.regions = []; renderRegions(); saveRegions(); };
+Object.keys(PRESETS).forEach(k => { const o = document.createElement('option'); o.value = k; o.textContent = k; $('preset').appendChild(o); });
+$('preset').onchange = e => {
+  const k = e.target.value; if (!k) return;
+  const b = PRESETS[k];
+  const r = addRegion([[b[0], b[1]], [b[2], b[1]], [b[2], b[3]], [b[0], b[3]]], k);
+  map.fitBounds(r.layer.getBounds(), {padding: [30, 30]});
+  e.target.value = '';
+};
+$('saveGeo').onclick = () => {
+  const fc = {type: 'FeatureCollection', features: S.regions.map(r => ({type: 'Feature', properties: {name: r.name},
+    geometry: {type: 'Polygon', coordinates: [[...r.ring, r.ring[0]]]}}))};
+  downloadBlob(JSON.stringify(fc, null, 1), 'gondu_regions.geojson', 'application/geo+json');
+};
+$('loadGeo').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try {
+    const gj = JSON.parse(await f.text());
+    const feats = gj.type === 'FeatureCollection' ? gj.features : gj.type === 'Feature' ? [gj] : [{geometry: gj, properties: {}}];
+    let n = 0;
+    feats.forEach((ft, i) => {
+      const g = ft.geometry; if (!g) return;
+      const polys = g.type === 'Polygon' ? [g.coordinates] : g.type === 'MultiPolygon' ? g.coordinates : [];
+      polys.forEach(p => {
+        const ring = p[0].slice(0, -1).map(c => [c[0], c[1]]);
+        const nm = (ft.properties && (ft.properties.name || ft.properties.Name || ft.properties.NAME)) || ('Imported ' + (i + 1));
+        addRegion(ring, String(nm), true); n++;
+      });
+    });
+    renderRegions(); saveRegions();
+    if (n) map.fitBounds(regionGroup.getBounds(), {padding: [30, 30]});
+    setStatus(`Loaded ${n} region${n === 1 ? '' : 's'} from ${f.name}.`, 'ok');
+  } catch (err) { setStatus('Could not read that file as GeoJSON: ' + err.message, 'bad'); }
+  e.target.value = '';
+};
+
+// =====================================================================
+//  CONTROLS
+// =====================================================================
+function yearOptions() {
+  const first = SENSOR[$('sensor').value].first, y0 = $('y0').value, y1 = $('y1').value;
+  ['y0', 'y1'].forEach(id => { $(id).innerHTML = ''; for (let y = first; y <= THIS_YEAR; y++) $(id).add(new Option(y, y)); });
+  $('y0').value = (y0 && +y0 >= first) ? y0 : String(Math.max(first, 2017));
+  $('y1').value = y1 || String(THIS_YEAR - 1);
+}
+function bindRange(id, outFmt, onChange) {
+  const el = $(id), out = $(id + 'V');
+  const upd = () => { out.textContent = outFmt(+el.value); };
+  el.addEventListener('input', () => { upd(); if (onChange) onChange(); });
+  upd();
+}
+const reanalyseSoon = debounce(() => { if (S.last && !S.running) analyseAndRender(); }, 250);
+function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
+bindRange('cloud', v => v + ' %');
+bindRange('nScenes', v => v);
+bindRange('minClear', v => v + ' %');
+bindRange('thr', v => (v > 0 ? '+' : '') + v.toFixed(2), reanalyseSoon);
+bindRange('sigma', v => v ? v.toFixed(2) + ' px' : 'off', reanalyseSoon);
+bindRange('minArea', v => v ? v.toLocaleString() + ' m²' : 'off', reanalyseSoon);
+$('otsu').onchange = () => { $('thr').disabled = $('otsu').checked; reanalyseSoon(); };
+$('chaikin').onchange = reanalyseSoon;
+$('sensor').onchange = () => {
+  yearOptions(); renderRegions();
+  if ($('sensor').value === 'ls' && S.src !== 'pc') setSource('pc');
+  if ($('sensor').value === 'ls' && +$('y0').value > 2000) { $('y0').value = '2000'; $('step').value = '2'; }
+  $('mapIdx').textContent = $('sensor').value === 'ls' ? 'LANDSAT · 30 M / MALDIVES' : 'SENTINEL-2 · 10 M / MALDIVES';
+};
+function setSource(src) {
+  S.src = src;
+  document.querySelectorAll('#srcSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.src === src));
+  if (src === 'es' && $('sensor').value === 'ls') { $('sensor').value = 's2'; $('sensor').onchange(); }
+  store('src', src);
+}
+document.querySelectorAll('#srcSeg button').forEach(b => b.onclick = () => setSource(b.dataset.src));
+$('themeBtn').onclick = () => {
+  const dark = document.documentElement.dataset.theme !== 'dark';
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  store('theme', dark ? 'dark' : 'light');
+  if (S.analysis) renderResults(S.analysis);
+};
+
+function readCfg() {
+  const sensor = $('sensor').value, season = $('season').value.split('-').map(Number);
+  const res = SENSOR[sensor].res, minArea = +$('minArea').value;
+  return {
+    src: S.src, sensor, res, y0: +$('y0').value, y1: +$('y1').value, step: +$('step').value,
+    m0: season[0], m1: season[1], seasonLabel: $('season').selectedOptions[0].textContent,
+    cloud: +$('cloud').value, nScenes: +$('nScenes').value, minClear: +$('minClear').value / 100,
+    index: $('index').value, otsu: $('otsu').checked, thr: +$('thr').value, sigma: +$('sigma').value,
+    minArea, minPix: Math.max(1, Math.round(minArea / (res * res))), chaikin: $('chaikin').checked, rgb: $('rgb').checked
+  };
+}
+
+// ---------------- status / progress ----------------
+function setStatus(msg, kind) { const s = $('status'); s.textContent = msg; s.className = 'status ' + (kind || 'info'); }
+function setBusy(on, msg, frac) {
+  $('busy').style.display = on ? 'block' : 'none';
+  $('prog').style.display = on ? 'block' : 'none';
+  if (msg) $('busyTxt').textContent = msg;
+  if (frac != null) { const w = Math.round(Math.max(0, Math.min(1, frac)) * 100) + '%'; $('busyBar').style.width = w; $('prog').firstElementChild.style.width = w; }
+}
+$('abortBtn').onclick = () => { S.abort = true; $('busyTxt').textContent = 'Stopping after the current scene…'; };
+
+// =====================================================================
+//  DATA ACCESS: STAC search + Cloud-Optimised GeoTIFF window reads
+// =====================================================================
+async function fetchJSON(url, opts, tries = 3) {
+  let lastErr;
+  for (let t = 0; t < tries; t++) {
+    try {
+      const r = await fetch(url, opts);
+      if (r.status === 429 || r.status >= 500) throw new Error('HTTP ' + r.status);
+      if (!r.ok) throw new Error('HTTP ' + r.status + ' ' + (await r.text()).slice(0, 200));
+      return await r.json();
+    } catch (e) { lastErr = e; await sleep(800 * (t + 1)); }
+  }
+  throw lastErr;
+}
+async function stacSearch(cfg, collection, bbox, year) {
+  const src = SOURCES[cfg.src];
+  const body = {collections: [collection], bbox, limit: 100,
+    datetime: `${year}-01-01T00:00:00Z/${year}-12-31T23:59:59Z`,
+    query: {'eo:cloud_cover': {lt: cfg.cloud}}};
+  if (cfg.sensor === 'ls') body.query.platform = {in: ['landsat-5', 'landsat-7', 'landsat-8', 'landsat-9']};
+  let items = [], url = src.search, opts = {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)};
+  for (let page = 0; page < 4 && url; page++) {
+    const js = await fetchJSON(url, opts);
+    items = items.concat(js.features || []);
+    const next = (js.links || []).find(l => l.rel === 'next');
+    if (!next) break;
+    url = next.href;
+    opts = next.method === 'POST' || next.body ? {method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(next.merge ? Object.assign({}, body, next.body) : (next.body || body))} : {method: 'GET'};
+  }
+  return items;
+}
+function monthOK(item, cfg) {
+  const m = new Date(item.properties.datetime).getUTCMonth() + 1;
+  return cfg.m0 <= cfg.m1 ? (m >= cfg.m0 && m <= cfg.m1) : (m >= cfg.m0 || m <= cfg.m1);
+}
+function tileKey(item) {
+  const p = item.properties;
+  return p['grid:code'] || p['s2:mgrs_tile'] ||
+    (p['mgrs:utm_zone'] ? `${p['mgrs:utm_zone']}${p['mgrs:latitude_band']}${p['mgrs:grid_square']}` : null) ||
+    (p['landsat:wrs_path'] ? `WRS ${p['landsat:wrs_path']}/${p['landsat:wrs_row']}` : null) || 'all';
+}
+async function pcSign(href, collection) {
+  const now = Date.now(), tk = S.pcTokens[collection];
+  if (!tk || now - tk.t > 40 * 60 * 1000) {
+    const js = await fetchJSON('https://planetarycomputer.microsoft.com/api/sas/v1/token/' + collection, {});
+    S.pcTokens[collection] = {token: js.token, t: now};
+  }
+  return href + (href.includes('?') ? '&' : '?') + S.pcTokens[collection].token;
+}
+async function assetHref(item, key, cfg) {
+  const a = item.assets[key];
+  if (!a) throw new Error('Scene ' + item.id + ' has no ' + key + ' band');
+  return SOURCES[cfg.src].sign ? pcSign(a.href, item.collection) : a.href;
+}
+function scaleOffset(item, key, cfg) {
+  const a = item.assets[key] || {};
+  const rb = (a['raster:bands'] && a['raster:bands'][0]) || (a.bands && a.bands[0]) || {};
+  let scale = rb.scale, offset = rb.offset;
+  if (cfg.sensor === 'ls') { if (scale == null) scale = 2.75e-5; if (offset == null) offset = -0.2; }
+  else {
+    if (scale == null) scale = 1e-4;
+    if (offset == null) {
+      const pb = parseFloat(item.properties['s2:processing_baseline'] || '0');
+      offset = (cfg.src === 'pc' && pb >= 4) ? -0.1 : 0;
+    }
+  }
+  return {scale, offset};
+}
+function openTiff(href) {
+  const key = href.split('?')[0];
+  if (!S.tiffs.has(key)) {
+    S.tiffs.set(key, GeoTIFF.fromUrl(href, {allowFullFile: false}).catch(e => { S.tiffs.delete(key); throw e; }));
+    if (S.tiffs.size > 60) S.tiffs.delete(S.tiffs.keys().next().value);
+  }
+  return S.tiffs.get(key);
+}
+function tiffEPSG(img) {
+  const g = img.getGeoKeys() || {};
+  return g.ProjectedCSTypeGeoKey || g.ProjectedCRSGeoKey || null;
+}
+// Read one band on the region grid (nearest-neighbour resample to grid.res)
+async function readOnGrid(href, grid) {
+  const tiff = await openTiff(href);
+  const img = await tiff.getImage(0);
+  const epsg = tiffEPSG(img);
+  if (epsg && epsg !== grid.epsg) throw new Error('projection mismatch');
+  const [ox, oy] = img.getOrigin(), [rx, ry] = img.getResolution();
+  const c0 = Math.round((grid.x0 - ox) / rx), r0 = Math.round((grid.y0 - oy) / ry);
+  const w = Math.round(grid.w * grid.res / rx), h = Math.round(grid.h * grid.res / Math.abs(ry));
+  const rasters = await img.readRasters({window: [c0, r0, c0 + w, r0 + h], width: grid.w, height: grid.h,
+    resampleMethod: 'nearest', fillValue: 0, interleave: false});
+  return rasters[0];
+}
+// Region grid on the UTM pixel grid of the chosen tile
+async function makeGrid(region, item, cfg) {
+  const b = SOURCES[cfg.src].bands[cfg.sensor];
+  const tiff = await openTiff(await assetHref(item, b.green, cfg));
+  const img = await tiff.getImage(0);
+  const epsg = tiffEPSG(img) || item.properties['proj:epsg'] || parseInt(String(item.properties['proj:code'] || '').split(':')[1], 10);
+  if (!epsg) throw new Error('Could not determine the projection of the imagery');
+  const [ox, oy] = img.getOrigin(), res = cfg.res;
+  const xy = region.ring.map(p => UTM.fwd(p[0], p[1], epsg));
+  let minE = Math.min(...xy.map(p => p[0])), maxE = Math.max(...xy.map(p => p[0]));
+  let minN = Math.min(...xy.map(p => p[1])), maxN = Math.max(...xy.map(p => p[1]));
+  const x0 = ox + Math.floor((minE - ox) / res - 2) * res, y0 = oy - Math.floor((oy - maxN) / res - 2) * res;
+  const w = Math.ceil((maxE - x0) / res + 2), h = Math.ceil((y0 - minN) / res + 2);
+  const mask = new Uint8Array(w * h);
+  let n = 0;
+  for (let r = 0; r < h; r++) for (let c = 0; c < w; c++) {
+    if (pip(x0 + (c + .5) * res, y0 - (r + .5) * res, xy)) { mask[r * w + c] = 1; n++; }
+  }
+  return {epsg, x0, y0, w, h, res, mask, nIn: n, xy};
+}
+
+// ---------------- per-scene processing ----------------
+function clearMask(maskBand, cfg) {
+  const out = new Uint8Array(maskBand.length);
+  if (cfg.sensor === 's2') {
+    // SCL: 0 nodata, 1 saturated, 3 cloud shadow, 8/9 cloud, 10 cirrus → masked
+    for (let i = 0; i < maskBand.length; i++) { const v = maskBand[i]; out[i] = (v === 2 || v === 4 || v === 5 || v === 6 || v === 7 || v === 11) ? 1 : 0; }
+  } else {
+    // QA_PIXEL: bit0 fill, bit1 dilated cloud, bit3 cloud, bit4 shadow
+    for (let i = 0; i < maskBand.length; i++) { const v = maskBand[i]; out[i] = (v & 0b11011) ? 0 : 1; }
+  }
+  return out;
+}
+async function processScene(item, grid, cfg, wantRGB) {
+  const b = SOURCES[cfg.src].bands[cfg.sensor];
+  const maskBand = await readOnGrid(await assetHref(item, b.mask, cfg), grid);
+  const clr = clearMask(maskBand, cfg);
+  let nClear = 0;
+  for (let i = 0; i < clr.length; i++) if (grid.mask[i] && clr[i]) nClear++;
+  const frac = nClear / Math.max(1, grid.nIn);
+  if (frac < cfg.minClear) return {frac, skipped: true};
+  const keys = [b.green, cfg.index === 'mndwi' ? b.swir : b.nir];
+  if (wantRGB) keys.push(b.red, b.blue);
+  const bands = await Promise.all(keys.map(async k => {
+    const raw = await readOnGrid(await assetHref(item, k, cfg), grid);
+    const so = scaleOffset(item, k, cfg), out = new Float32Array(raw.length);
+    for (let i = 0; i < raw.length; i++) out[i] = raw[i] === 0 ? NaN : raw[i] * so.scale + so.offset;
+    return out;
+  }));
+  const [g, x] = bands, n = g.length, idx = new Float32Array(n), raw = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const d = g[i] + x[i];
+    const v = (isFinite(d) && Math.abs(d) > 1e-6) ? (g[i] - x[i]) / d : NaN;
+    raw[i] = v;
+    idx[i] = clr[i] ? v : NaN;
+  }
+  return {frac, idx, raw, rgb: wantRGB ? {r: bands[2], g: bands[0], b: bands[3], clr} : null,
+          date: item.properties.datetime.slice(0, 10), id: item.id};
+}
+function medianComposite(scenes, n) {
+  const k = scenes.length, idx = new Float32Array(n), buf = new Float32Array(k);
+  let filled = 0;
+  for (let i = 0; i < n; i++) {
+    let m = 0;
+    for (let s = 0; s < k; s++) { const v = scenes[s].idx[i]; if (v === v) buf[m++] = v; }
+    if (!m) {   // never clear: fall back to all observations (bright sand is sometimes flagged as cloud)
+      for (let s = 0; s < k; s++) { const v = scenes[s].raw[i]; if (v === v) buf[m++] = v; }
+      if (m) filled++;
+    }
+    if (!m) { idx[i] = NaN; continue; }
+    const a = buf.subarray(0, m).sort();
+    idx[i] = m % 2 ? a[(m - 1) / 2] : (a[m / 2 - 1] + a[m / 2]) / 2;
+  }
+  return {idx, filled};
+}
+function rgbComposite(scenes, n) {
+  const withRgb = scenes.filter(s => s.rgb);
+  if (!withRgb.length) return null;
+  const out = {r: new Float32Array(n), g: new Float32Array(n), b: new Float32Array(n)}, buf = new Float32Array(withRgb.length);
+  ['r', 'g', 'b'].forEach(ch => {
+    for (let i = 0; i < n; i++) {
+      let m = 0;
+      for (const s of withRgb) { const v = s.rgb[ch][i]; if (v === v && s.rgb.clr[i]) buf[m++] = v; }
+      if (!m) for (const s of withRgb) { const v = s.rgb[ch][i]; if (v === v) buf[m++] = v; }
+      out[ch][i] = m ? buf.subarray(0, m).sort()[m >> 1] : NaN;
+    }
+  });
+  return out;
+}
+
+// =====================================================================
+//  RUN: search → download → composite (cached) → analyse
+// =====================================================================
+$('runBtn').onclick = run;
+async function run() {
+  if (S.running) return;
+  cancelDraw();
+  const cfg = readCfg();
+  const regions = S.regions.slice();
+  if (!regions.length) return setStatus('Draw at least one region on the map first (or quick-add a preset).', 'bad');
+  if (cfg.sensor === 'ls' && cfg.src !== 'pc') return setStatus('Landsat is only available from Planetary Computer — switch the source at the top right.', 'bad');
+  if (cfg.y1 <= cfg.y0) return setStatus('The end year must be after the start year.', 'bad');
+  const years = [];
+  for (let y = cfg.y0; y <= cfg.y1; y += cfg.step) years.push(y);
+  if (years[years.length - 1] !== cfg.y1) years.push(cfg.y1);
+  if (regions.length * years.length > MAX_COMPOSITES)
+    return setStatus(`${regions.length} regions × ${years.length} years is too many for a browser. Keep it under ${MAX_COMPOSITES}: fewer regions, a shorter period or a larger step.`, 'bad');
+  let totPix = 0;
+  for (const r of regions) {
+    const pix = ringAreaKm2(r.ring) * 1e6 / (cfg.res * cfg.res);
+    totPix += pix;
+    if (pix > MAX_PIX_REGION) return setStatus(`“${r.name}” is too large (${fmt(ringAreaKm2(r.ring), 1)} km²). Keep each region under about ${fmt(MAX_PIX_REGION * cfg.res * cfg.res / 1e6, 0)} km² for ${SENSOR[cfg.sensor].label}.`, 'bad');
+  }
+  if (totPix > MAX_PIX_TOTAL) return setStatus(`All regions together are too large for a browser — keep the total under about ${fmt(MAX_PIX_TOTAL * cfg.res * cfg.res / 1e6, 0)} km².`, 'bad');
+
+  S.running = true; S.abort = false;
+  $('runBtn').disabled = true;
+  setBusy(true, 'Searching the imagery catalogue…', 0.02);
+  setStatus('Searching ' + SOURCES[cfg.src].name + ' for ' + SENSOR[cfg.sensor].label + ' scenes…', 'info');
+
+  const out = {cfg, regions: []};
+  const warnings = [];
+  try {
+    const collections = cfg.sensor === 's2' ? SOURCES[cfg.src].s2 : [SOURCES[cfg.src].ls];
+    // 1 — search every region × year
+    const searches = [];
+    for (const r of regions) for (const y of years) searches.push({r, y});
+    let done = 0;
+    const found = new Map();
+    await pool(searches, 4, async s => {
+      const bbox = bboxOf(s.r.ring);
+      let items = [];
+      for (const c of collections) {
+        items = await stacSearch(cfg, c, bbox, s.y);
+        if (items.length) break;
+      }
+      items = items.filter(it => monthOK(it, cfg));
+      if (cfg.sensor === 'ls') items = items.filter(it => !(it.properties.platform === 'landsat-7' && it.properties.datetime > '2003-05-31'));
+      found.set(s.r.id + ':' + s.y, items);
+      setBusy(true, `Searching catalogue… ${++done}/${searches.length}`, 0.02 + 0.08 * done / searches.length);
+    });
+
+    // 2 — per region: pick one tile (consistent pixel grid), make grid
+    const plan = [];
+    for (const r of regions) {
+      const all = years.flatMap(y => found.get(r.id + ':' + y) || []);
+      const bb = bboxOf(r.ring), corners = [[bb[0], bb[1]], [bb[2], bb[1]], [bb[2], bb[3]], [bb[0], bb[3]]];
+      const full = all.filter(it => geomContains(it.geometry, corners));
+      const pickFrom = full.length ? full : all;
+      if (!pickFrom.length) { warnings.push(`${r.name}: no scenes found.`); continue; }
+      const counts = {};
+      pickFrom.forEach(it => { const k = tileKey(it); counts[k] = (counts[k] || 0) + 1; });
+      const tk = Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0];
+      const sameTile = it => tileKey(it) === tk && (!full.length || geomContains(it.geometry, corners));
+      const gkey = JSON.stringify([r.ring, cfg.src, cfg.sensor, tk]);
+      let grid = S.grids.get(gkey);
+      if (!grid) { grid = await makeGrid(r, pickFrom.find(it => tileKey(it) === tk), cfg); S.grids.set(gkey, grid); }
+      const byYear = years.map(y => ({y, items: (found.get(r.id + ':' + y) || []).filter(sameTile)
+        .sort((a, b) => (a.properties['eo:cloud_cover'] || 0) - (b.properties['eo:cloud_cover'] || 0))}));
+      plan.push({r, grid, tile: tk, byYear});
+    }
+    if (!plan.length) throw new Error('No imagery was found for any region. Try a different period, a higher cloud limit or the other source.');
+
+    // 3 — download + composite (with cache)
+    const jobs = [];
+    plan.forEach(p => p.byYear.forEach((yy, k) => jobs.push({p, yy, first: k === 0, last: k === p.byYear.length - 1})));
+    let jd = 0;
+    const compsBy = new Map();
+    for (const job of jobs) {
+      if (S.abort) throw new Error('Stopped.');
+      const {p, yy} = job;
+      const wantRGB = cfg.rgb && (job.first || job.last);
+      const ckey = JSON.stringify([p.r.ring, cfg.src, cfg.sensor, p.tile, yy.y, cfg.m0, cfg.m1, cfg.cloud, cfg.nScenes, cfg.minClear, cfg.index]);
+      let comp = S.cache.get(ckey);
+      if (comp && wantRGB && !comp.rgb) comp = null;
+      if (!comp) {
+        const accepted = [];
+        const cands = yy.items.slice(0, cfg.nScenes * 3 + 3);
+        let tried = 0;
+        for (let i = 0; i < cands.length && accepted.length < cfg.nScenes; i += 3) {
+          if (S.abort) throw new Error('Stopped.');
+          const batch = cands.slice(i, i + Math.min(3, cfg.nScenes - accepted.length + 1));
+          const res = await Promise.all(batch.map(it => processScene(it, p.grid, cfg, wantRGB).catch(e => ({error: e}))));
+          for (const s of res) {
+            tried++;
+            if (s.error) { warnings.push(`${p.r.name} ${yy.y}: a scene failed to load (${s.error.message || s.error}).`); continue; }
+            if (!s.skipped && accepted.length < cfg.nScenes) accepted.push(s);
+          }
+          setBusy(true, `${p.r.name} · ${yy.y} · ${accepted.length}/${cfg.nScenes} clear scenes (checked ${tried})`,
+            0.1 + 0.88 * (jd + accepted.length / cfg.nScenes) / jobs.length);
+        }
+        if (!accepted.length) comp = {empty: true, scenes: [], checked: tried, available: yy.items.length};
+        else {
+          const n = p.grid.w * p.grid.h, mc = medianComposite(accepted, n);
+          let valid = 0;
+          for (let i = 0; i < n; i++) if (p.grid.mask[i] && mc.idx[i] === mc.idx[i]) valid++;
+          comp = {idx: mc.idx, filled: mc.filled, valid: valid / p.grid.nIn, rgb: wantRGB ? rgbComposite(accepted, n) : null,
+                  scenes: accepted.map(s => s.date).sort(), checked: tried, available: yy.items.length};
+        }
+        S.cache.set(ckey, comp);
+        if (S.cache.size > 200) S.cache.delete(S.cache.keys().next().value);
+      }
+      jd++;
+      setBusy(true, `${p.r.name} · ${yy.y} · done`, 0.1 + 0.88 * jd / jobs.length);
+      if (!compsBy.has(p.r.id)) compsBy.set(p.r.id, []);
+      compsBy.get(p.r.id).push({year: yy.y, comp});
+    }
+    plan.forEach(p => {
+      const ys = compsBy.get(p.r.id) || [];
+      const missing = ys.filter(c => c.comp.empty).map(c => c.year);
+      if (missing.length) warnings.push(`${p.r.name}: no clear composite for ${missing.join(', ')}.`);
+      out.regions.push({region: p.r, grid: p.grid, tile: p.tile, years: ys.filter(c => !c.comp.empty)});
+    });
+    S.last = out;
+    S.warnings = warnings;
+    analyseAndRender();
+    const nOK = out.regions.filter(x => x.years.length >= 2).length;
+    setStatus(`✓ Done — ${nOK} region${nOK === 1 ? '' : 's'} analysed.` + (warnings.length ? '\n' + warnings.slice(0, 6).join('\n') : '') +
+      '\nThreshold, smoothing and patch size now update instantly.', nOK ? 'ok' : 'bad');
+  } catch (e) {
+    console.error(e);
+    let msg = e.message || String(e);
+    if (/Failed to fetch|NetworkError|Load failed|CORS/i.test(msg))
+      msg = `Could not reach ${SOURCES[cfg.src].name} (network or browser blocked the request). Check your connection, or switch the imagery source at the top right and run again.`;
+    setStatus('⚠ ' + msg, 'bad');
+  } finally {
+    S.running = false;
+    $('runBtn').disabled = false;
+    setBusy(false);
+  }
+}
+async function pool(arr, n, fn) {
+  let i = 0;
+  const workers = Array.from({length: Math.min(n, arr.length)}, async () => { while (i < arr.length) { const k = i++; await fn(arr[k], k); } });
+  await Promise.all(workers);
+}
+
+// =====================================================================
+//  ANALYSIS (fast; re-run when detection settings change)
+// =====================================================================
+function gaussianNaN(src, w, h, sigma) {
+  if (!sigma) return Float32Array.from(src);
+  const rad = Math.ceil(3 * sigma), k = [];
+  let ks = 0;
+  for (let i = -rad; i <= rad; i++) { const v = Math.exp(-i * i / (2 * sigma * sigma)); k.push(v); ks += v; }
+  for (let i = 0; i < k.length; i++) k[i] /= ks;
+  const n = w * h, val = new Float32Array(n), wt = new Float32Array(n);
+  for (let i = 0; i < n; i++) { const ok = src[i] === src[i]; val[i] = ok ? src[i] : 0; wt[i] = ok ? 1 : 0; }
+  const pass = (a, horiz) => {
+    const o = new Float32Array(n);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      let s = 0;
+      for (let t = -rad; t <= rad; t++) {
+        const xx = horiz ? x + t : x, yy = horiz ? y : y + t;
+        if (xx < 0 || yy < 0 || xx >= w || yy >= h) continue;
+        s += a[yy * w + xx] * k[t + rad];
+      }
+      o[y * w + x] = s;
+    }
+    return o;
+  };
+  const v2 = pass(pass(val, true), false), w2 = pass(pass(wt, true), false), out = new Float32Array(n);
+  for (let i = 0; i < n; i++) out[i] = (src[i] === src[i] && w2[i] > 1e-6) ? v2[i] / w2[i] : NaN;
+  return out;
+}
+function otsuThreshold(F, mask) {
+  const bins = 200, lo = -0.8, hi = 0.8, hist = new Float64Array(bins);
+  let tot = 0;
+  for (let i = 0; i < F.length; i++) {
+    if (!mask[i] || F[i] !== F[i]) continue;
+    const b = Math.max(0, Math.min(bins - 1, Math.floor((F[i] - lo) / (hi - lo) * bins)));
+    hist[b]++; tot++;
+  }
+  if (!tot) return 0;
+  let sum = 0;
+  for (let b = 0; b < bins; b++) sum += hist[b] * (lo + (b + .5) * (hi - lo) / bins);
+  let wB = 0, sB = 0, best = -1, thr = 0;
+  for (let b = 0; b < bins - 1; b++) {
+    wB += hist[b]; if (!wB) continue;
+    const wF = tot - wB; if (!wF) break;
+    sB += hist[b] * (lo + (b + .5) * (hi - lo) / bins);
+    const mB = sB / wB, mF = (sum - sB) / wF, v = wB * wF * (mB - mF) ** 2;
+    if (v > best) { best = v; thr = lo + (b + 1) * (hi - lo) / bins; }
+  }
+  return Math.max(-0.25, Math.min(0.25, thr));
+}
+// connected components of value==target in Uint8 array; fn(pixels) for each component
+function components(arr, w, h, target, eight, fn) {
+  const seen = new Uint8Array(arr.length), stack = new Int32Array(arr.length);
+  for (let s = 0; s < arr.length; s++) {
+    if (seen[s] || arr[s] !== target) continue;
+    let sp = 0, list = [];
+    stack[sp++] = s; seen[s] = 1;
+    while (sp) {
+      const p = stack[--sp]; list.push(p);
+      const x = p % w, y = (p - x) / w;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        if (!dx && !dy) continue;
+        if (!eight && dx && dy) continue;
+        const xx = x + dx, yy = y + dy;
+        if (xx < 0 || yy < 0 || xx >= w || yy >= h) continue;
+        const q = yy * w + xx;
+        if (!seen[q] && arr[q] === target) { seen[q] = 1; stack[sp++] = q; }
+      }
+    }
+    fn(list);
+  }
+}
+function dropSmall(bin, w, h, minPix) {      // bin Uint8 0/1 → copy with small 1-patches removed
+  const out = Uint8Array.from(bin);
+  if (minPix <= 1) return out;
+  components(bin, w, h, 1, true, list => { if (list.length < minPix) list.forEach(p => out[p] = 0); });
+  return out;
+}
+
+// ---- marching squares on a scalar field (NaN = no data) ----
+function contour(F, w, h, level, allowed) {
+  // vertex coordinates in pixel-centre space: point (x,y) == centre of pixel (x,y)
+  const segs = [];
+  const val = (x, y) => F[y * w + x];
+  const ok = (x, y) => allowed[y * w + x] && F[y * w + x] === F[y * w + x];
+  const interp = (x1, y1, v1, x2, y2, v2) => { const t = (level - v1) / (v2 - v1); return [x1 + t * (x2 - x1), y1 + t * (y2 - y1)]; };
+  for (let y = 0; y < h - 1; y++) for (let x = 0; x < w - 1; x++) {
+    if (!ok(x, y) || !ok(x + 1, y) || !ok(x, y + 1) || !ok(x + 1, y + 1)) continue;
+    const a = val(x, y), b = val(x + 1, y), c = val(x + 1, y + 1), d = val(x, y + 1);
+    const idx = (a < level ? 8 : 0) | (b < level ? 4 : 0) | (c < level ? 2 : 0) | (d < level ? 1 : 0);
+    if (idx === 0 || idx === 15) continue;
+    // edge ids: T(top) R B L ; keys unique per grid edge
+    const E = {
+      T: [`h${x},${y}`, () => interp(x, y, a, x + 1, y, b)],
+      R: [`v${x + 1},${y}`, () => interp(x + 1, y, b, x + 1, y + 1, c)],
+      B: [`h${x},${y + 1}`, () => interp(x, y + 1, d, x + 1, y + 1, c)],
+      L: [`v${x},${y}`, () => interp(x, y, a, x, y + 1, d)]
+    };
+    const S2 = (p, q) => segs.push([E[p][0], E[p][1](), E[q][0], E[q][1]()]);
+    const center = (a + b + c + d) / 4;
+    switch (idx) {
+      case 1: case 14: S2('L', 'B'); break;
+      case 2: case 13: S2('B', 'R'); break;
+      case 3: case 12: S2('L', 'R'); break;
+      case 4: case 11: S2('T', 'R'); break;
+      case 6: case 9: S2('T', 'B'); break;
+      case 7: case 8: S2('L', 'T'); break;
+      case 5: if (center < level) { S2('L', 'T'); S2('B', 'R'); } else { S2('L', 'B'); S2('T', 'R'); } break;
+      case 10: if (center < level) { S2('T', 'R'); S2('L', 'B'); } else { S2('L', 'T'); S2('B', 'R'); } break;
+    }
+  }
+  // join segments into polylines via shared edge keys
+  const adj = new Map();
+  segs.forEach((s, i) => {
+    [[s[0], i], [s[2], i]].forEach(([k, j]) => { if (!adj.has(k)) adj.set(k, []); adj.get(k).push(j); });
+  });
+  const used = new Uint8Array(segs.length), lines = [];
+  const other = (s, k) => s[0] === k ? [s[2], s[3]] : [s[0], s[1]];
+  for (let i = 0; i < segs.length; i++) {
+    if (used[i]) continue;
+    used[i] = 1;
+    const s = segs[i];
+    let pts = [s[1], s[3]], headKey = s[0], tailKey = s[2];
+    const grow = (key, atEnd) => {
+      for (;;) {
+        const cand = (adj.get(key) || []).find(j => !used[j]);
+        if (cand == null) return key;
+        used[cand] = 1;
+        const [nk, np] = other(segs[cand], key);
+        if (atEnd) pts.push(np); else pts.unshift(np);
+        key = nk;
+      }
+    };
+    tailKey = grow(tailKey, true);
+    headKey = grow(headKey, false);
+    lines.push({pts, closed: headKey === tailKey && pts.length > 3});
+  }
+  return lines;
+}
+function chaikin(pts, closed, iters) {
+  for (let k = 0; k < iters; k++) {
+    if (pts.length < 3) return pts;
+    const o = [];
+    const n = closed ? pts.length - 1 : pts.length - 1;
+    if (!closed) o.push(pts[0]);
+    for (let i = 0; i < n; i++) {
+      const p = pts[i], q = pts[i + 1];
+      o.push([.75 * p[0] + .25 * q[0], .75 * p[1] + .25 * q[1]], [.25 * p[0] + .75 * q[0], .25 * p[1] + .75 * q[1]]);
+    }
+    if (closed) o.push(o[0]); else o.push(pts[pts.length - 1]);
+    pts = o;
+  }
+  return pts;
+}
+function pxToUTM(grid, p) { return [grid.x0 + (p[0] + .5) * grid.res, grid.y0 - (p[1] + .5) * grid.res]; }
+function polyLength(utm) { let L = 0; for (let i = 1; i < utm.length; i++) L += Math.hypot(utm[i][0] - utm[i - 1][0], utm[i][1] - utm[i - 1][1]); return L; }
+
+function analyseRegion(R, cfg, det) {
+  const {grid} = R, w = grid.w, h = grid.h, n = w * h;
+  const minPix = det.minPix;
+  const years = [];
+  let prevLand = null, firstLand = null;
+  for (const Y of R.years) {
+    const F = gaussianNaN(Y.comp.idx, w, h, det.sigma);
+    const thr = det.otsu ? otsuThreshold(F, grid.mask) : det.thr;
+    // land / water / nodata
+    let land = new Uint8Array(n);
+    const valid = new Uint8Array(n);
+    for (let i = 0; i < n; i++) {
+      if (grid.mask[i] && F[i] === F[i]) { valid[i] = 1; land[i] = F[i] < thr ? 1 : 0; }
+    }
+    land = dropSmall(land, w, h, minPix);                     // tiny islands
+    const water = new Uint8Array(n);
+    for (let i = 0; i < n; i++) water[i] = valid[i] && !land[i] ? 1 : 0;
+    const water2 = dropSmall(water, w, h, minPix);            // tiny holes → land
+    for (let i = 0; i < n; i++) if (water[i] && !water2[i]) land[i] = 1;
+
+    // shoreline vectors from the smooth field
+    const lines = contour(F, w, h, thr, grid.mask).map(l => {
+      let pts = l.pts;
+      if (l.closed && pts.length && (pts[0][0] !== pts[pts.length - 1][0] || pts[0][1] !== pts[pts.length - 1][1])) pts = pts.concat([pts[0]]);
+      const areaPx = l.closed ? Math.abs(signedArea(pts)) : Infinity;
+      if (det.chaikin) pts = chaikin(pts, l.closed, 2);
+      const utm = pts.map(p => pxToUTM(grid, p));
+      return {utm, closed: l.closed, area: areaPx * grid.res * grid.res, length: polyLength(utm)};
+    }).filter(l => l.area >= Math.max(det.minArea, grid.res * grid.res) && l.length >= 2 * grid.res);
+
+    let landPix = 0, validPix = 0;
+    for (let i = 0; i < n; i++) if (valid[i]) { validPix++; if (land[i]) landPix++; }
+    const rec = {year: Y.year, thr, land, valid, lines, scenes: Y.comp.scenes, filled: Y.comp.filled,
+      validPct: validPix / grid.nIn, land_ha: landPix * grid.res * grid.res / 1e4,
+      shoreline_km: lines.reduce((s, l) => s + l.length, 0) / 1000, rgb: Y.comp.rgb};
+    if (prevLand) {
+      const ch = changeMasks(prevLand.land, land, prevLand.valid, valid, w, h, minPix);
+      Object.assign(rec, {from_year: prevLand.year, accr_ha: ch.accN * grid.res * grid.res / 1e4, eros_ha: ch.eroN * grid.res * grid.res / 1e4, change: ch});
+      rec.net_ha = rec.accr_ha - rec.eros_ha;
+    }
+    years.push(rec);
+    if (!firstLand) firstLand = rec;
+    prevLand = rec;
+  }
+  let net = null;
+  if (years.length >= 2) net = changeMasks(firstLand.land, prevLand.land, firstLand.valid, prevLand.valid, w, h, minPix);
+  return {region: R.region, grid, tile: R.tile, years, net};
+}
+function changeMasks(a, b, va, vb, w, h, minPix) {
+  const n = a.length, acc = new Uint8Array(n), ero = new Uint8Array(n);
+  for (let i = 0; i < n; i++) if (va[i] && vb[i]) { if (b[i] && !a[i]) acc[i] = 1; else if (a[i] && !b[i]) ero[i] = 1; }
+  const A = dropSmall(acc, w, h, minPix), E = dropSmall(ero, w, h, minPix);
+  let accN = 0, eroN = 0;
+  for (let i = 0; i < n; i++) { accN += A[i]; eroN += E[i]; }
+  return {acc: A, ero: E, accN, eroN};
+}
+function summarize(A) {
+  const rs = A.years;
+  if (rs.length < 2) return null;
+  const first = rs[0], last = rs[rs.length - 1], dt = last.year - first.year;
+  const meanLen = rs.reduce((s, x) => s + x.shoreline_km, 0) / rs.length * 1000;
+  let accT = 0, eroT = 0;
+  rs.forEach(x => { if (x.accr_ha != null) { accT += x.accr_ha; eroT += x.eros_ha; } });
+  const rate = ha => (meanLen > 0 && dt > 0) ? ha * 1e4 / meanLen / dt : NaN;
+  const nn = rs.length, sx = rs.reduce((s, x) => s + x.year, 0), sy = rs.reduce((s, x) => s + x.land_ha, 0);
+  const sxx = rs.reduce((s, x) => s + x.year * x.year, 0), sxy = rs.reduce((s, x) => s + x.year * x.land_ha, 0);
+  const trend = (nn * sxy - sx * sy) / (nn * sxx - sx * sx);
+  const netHa = last.land_ha - first.land_ha, netRate = rate(netHa);
+  return {A, region: A.region, rows: rs, first, last, years: dt, meanLen, accHa: accT, eroHa: eroT, netHa,
+    accRate: rate(accT), eroRate: rate(eroT), netRate, trend,
+    status: netRate <= -0.5 ? 'Eroding' : netRate >= 0.5 ? 'Accreting' : 'Stable'};
+}
+function analyseAndRender() {
+  if (!S.last) return;
+  const t0 = performance.now();
+  const det = readCfg();
+  const analyses = S.last.regions.filter(R => R.years.length >= 2).map(R => analyseRegion(R, S.last.cfg, det));
+  const sums = analyses.map(summarize).filter(Boolean);
+  S.analysis = {cfg: S.last.cfg, det, analyses, sums};
+  drawMap(S.analysis);
+  renderResults(S.analysis);
+  buildDownloads(S.analysis);
+  console.log('analysis ms', Math.round(performance.now() - t0));
+}
+
+// =====================================================================
+//  MAP LAYERS
+// =====================================================================
+function rasterOverlay(grid, colorAt, opacity, cls) {
+  // Reproject the UTM grid onto a lat/lon canvas (exact for each output pixel)
+  const corners = [[grid.x0, grid.y0], [grid.x0 + grid.w * grid.res, grid.y0], [grid.x0, grid.y0 - grid.h * grid.res], [grid.x0 + grid.w * grid.res, grid.y0 - grid.h * grid.res]]
+    .map(p => UTM.inv(p[0], p[1], grid.epsg));
+  const W = Math.min(...corners.map(c => c[0])), E = Math.max(...corners.map(c => c[0]));
+  const So = Math.min(...corners.map(c => c[1])), N = Math.max(...corners.map(c => c[1]));
+  const cw = Math.min(2048, grid.w), ch = Math.min(2048, grid.h);
+  const cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
+  const ctx = cv.getContext('2d'), im = ctx.createImageData(cw, ch), d = im.data;
+  for (let j = 0; j < ch; j++) {
+    const lat = N - (j + .5) * (N - So) / ch;
+    for (let i = 0; i < cw; i++) {
+      const lon = W + (i + .5) * (E - W) / cw;
+      const [x, y] = UTM.fwd(lon, lat, grid.epsg);
+      const c = Math.floor((x - grid.x0) / grid.res), r = Math.floor((grid.y0 - y) / grid.res);
+      if (c < 0 || r < 0 || c >= grid.w || r >= grid.h) continue;
+      const col = colorAt(r * grid.w + c);
+      if (!col) continue;
+      const o = (j * cw + i) * 4;
+      d[o] = col[0]; d[o + 1] = col[1]; d[o + 2] = col[2]; d[o + 3] = col[3] == null ? 255 : col[3];
+    }
+  }
+  ctx.putImageData(im, 0, 0);
+  return L.imageOverlay(cv.toDataURL(), [[So, W], [N, E]], {opacity, className: cls || ''});
+}
+const hexRGB = h => [parseInt(h.substr(1, 2), 16), parseInt(h.substr(3, 2), 16), parseInt(h.substr(5, 2), 16)];
+// Layer that is only built the first time it is switched on
+const LazyLayer = L.Layer.extend({
+  initialize(build) { this._build = build; },
+  onAdd(m) { if (!this._l) this._l = this._build(); this._l.addTo(m); },
+  onRemove(m) { if (this._l) m.removeLayer(this._l); }
+});
+function drawMap(AN) {
+  S.overlays.forEach(l => map.removeLayer(l));
+  S.overlays = [];
+  if (S.layerCtl) map.removeControl(S.layerCtl);
+  const overlays = {}, ACC = hexRGB('#0a9396'), ERO = hexRGB('#d1495b');
+  const add = (name, layer, on) => { overlays[name] = layer; S.overlays.push(layer); if (on) layer.addTo(map); };
+
+  // true colour first / last
+  AN.analyses.forEach(A => {
+    [A.years[0], A.years[A.years.length - 1]].forEach(Y => {
+      if (!Y || !Y.rgb) return;
+      const st = v => Math.max(0, Math.min(255, Math.round(255 * Math.pow(Math.max(0, (v - 0.01) / 0.29), 1 / 1.25))));
+      add(`${esc(A.region.name)} · true colour ${Y.year}`,
+        new LazyLayer(() => rasterOverlay(A.grid, i => (A.grid.mask[i] && Y.rgb.r[i] === Y.rgb.r[i]) ? [st(Y.rgb.r[i]), st(Y.rgb.g[i]), st(Y.rgb.b[i])] : null, 1)), false);
+    });
+  });
+  // interval change (off)
+  const pairs = {};
+  AN.analyses.forEach(A => A.years.forEach(Y => { if (Y.change) (pairs[`${Y.from_year}–${Y.year}`] = pairs[`${Y.from_year}–${Y.year}`] || []).push({A, ch: Y.change}); }));
+  Object.keys(pairs).sort().forEach(k => {
+    const g = new LazyLayer(() => L.layerGroup(pairs[k].map(({A, ch}) => rasterOverlay(A.grid, i => ch.acc[i] ? ACC : ch.ero[i] ? ERO : null, .85, 'px'))));
+    add('Change ' + k, g, false);
+  });
+  // net change (on)
+  const netG = L.layerGroup(AN.analyses.filter(A => A.net).map(A => rasterOverlay(A.grid, i => A.net.acc[i] ? ACC : A.net.ero[i] ? ERO : null, .8, 'px')));
+  add('<b>Net change · first → last</b>', netG, true);
+  // shorelines per year
+  const years = [...new Set(AN.analyses.flatMap(A => A.years.map(Y => Y.year)))].sort((a, b) => a - b);
+  years.forEach((y, i) => {
+    const color = rampColor(years.length > 1 ? i / (years.length - 1) : 0);
+    const g = L.layerGroup();
+    AN.analyses.forEach(A => A.years.filter(Y => Y.year === y).forEach(Y => Y.lines.forEach(l => {
+      L.polyline(l.utm.map(p => { const ll = UTM.inv(p[0], p[1], A.grid.epsg); return [ll[1], ll[0]]; }),
+        {color, weight: 2.4, opacity: .95}).bindTooltip(`${esc(A.region.name)} · shoreline ${y}`, {sticky: true}).addTo(g);
+    })));
+    add(`<span style="display:inline-block;width:14px;height:3px;background:${color};vertical-align:middle;margin-right:5px"></span>Shoreline ${y}`, g, i === 0 || i === years.length - 1);
+  });
+  S.layerCtl = L.control.layers({'Satellite (Esri)': baseSat, 'Street map (OSM)': baseOsm}, overlays, {collapsed: window.innerWidth < 1800, position: 'topright'}).addTo(map);
+  regionGroup.bringToFront();
+  // legend
+  const lg = $('legend');
+  lg.innerHTML = `<h4>NET CHANGE · FIRST → LAST</h4>
+    <div class="sw"><i style="background:#0a9396"></i>Accretion — water became land</div>
+    <div class="sw"><i style="background:#d1495b"></i>Erosion — land became water</div>` +
+    (years.length ? `<h4 style="margin-top:9px">SHORELINE YEAR</h4>
+    <div class="ramp" style="background:linear-gradient(90deg,${YEAR_RAMP.join(',')})"></div>
+    <div class="ticks"><span>${years[0]}</span><span>${years[years.length - 1]}</span></div>` : '') +
+    `<div style="font-size:10.5px;color:#6d858e;margin-top:7px">Click inside a region to see land/water by year.</div>`;
+  lg.style.display = 'block';
+}
+function inspect(latlng) {
+  if (!S.analysis) return;
+  for (const A of S.analysis.analyses) {
+    const [x, y] = UTM.fwd(latlng.lng, latlng.lat, A.grid.epsg);
+    const c = Math.floor((x - A.grid.x0) / A.grid.res), r = Math.floor((A.grid.y0 - y) / A.grid.res);
+    if (c < 0 || r < 0 || c >= A.grid.w || r >= A.grid.h) continue;
+    const i = r * A.grid.w + c;
+    if (!A.grid.mask[i]) continue;
+    const chips = A.years.map(Y => !Y.valid[i] ? `<span style="background:#9aaeb4">${Y.year}</span>`
+      : Y.land[i] ? `<span style="background:#b08a4d">${Y.year}</span>` : `<span style="background:#2f6fd0">${Y.year}</span>`).join('');
+    const net = A.net ? (A.net.acc[i] ? '<b style="color:#0a9396">accretion</b>' : A.net.ero[i] ? '<b style="color:#d1495b">erosion</b>' : 'no net change') : '';
+    L.popup().setLatLng(latlng).setContent(`<b>${esc(A.region.name)}</b><br>Net (first → last): ${net}
+      <div class="chips">${chips}</div><div style="margin-top:5px;color:#66818a">brown = land · blue = water · grey = no data</div>`).openOn(map);
+    return;
+  }
+}
+
+// =====================================================================
+//  RESULTS PANEL + CHARTS
+// =====================================================================
+$('showRes').onclick = () => { $('results').classList.add('on'); $('showRes').style.display = 'none'; setTimeout(() => map.invalidateSize(), 50); };
+function chartTheme() {
+  Chart.defaults.font.family = "'DM Sans', system-ui, sans-serif";
+  Chart.defaults.font.size = 11;
+  Chart.defaults.color = css('--ink2');
+  Chart.defaults.borderColor = css('--line2');
+}
+function mkChart(canvas, cfg) { const c = new Chart(canvas, cfg); S.charts.push(c); return c; }
+function renderResults(AN) {
+  S.charts.forEach(c => c.destroy()); S.charts = [];
+  chartTheme();
+  const el = $('results'), sums = AN.sums, cfg = AN.cfg, det = AN.det;
+  if (!sums.length) {
+    el.innerHTML = `<div class="res-head"><div class="brand-kicker">RESULTS</div><h2>Not enough data</h2>
+      <div class="meta">No region has clear composites in at least two years. Try a longer period, another season, a higher cloud limit or fewer clear scenes per year.</div></div>`;
+    el.classList.add('on'); return;
+  }
+  let accT = 0, eroT = 0, netT = 0, nEro = 0;
+  sums.forEach(s => { accT += s.accHa; eroT += s.eroHa; netT += s.netHa; if (s.status === 'Eroding') nEro++; });
+  const yr0 = Math.min(...sums.map(s => s.first.year)), yr1 = Math.max(...sums.map(s => s.last.year));
+  el.innerHTML = `
+    <div class="res-head">
+      <button class="ib x" id="closeRes" aria-label="Close results"><svg class="i" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+      <div class="brand-kicker">RESULTS</div>
+      <h2>Erosion &amp; accretion</h2>
+      <div class="meta">${SENSOR[cfg.sensor].label} · ${yr0}–${yr1} · ${esc(cfg.seasonLabel)} · ${cfg.index.toUpperCase()} ${det.otsu ? '(Otsu)' : '< ' + signed(det.thr, 2)} · σ ${det.sigma} px</div>
+    </div>
+    <div class="tiles">
+      <div class="tile"><div class="k">ACCRETED</div><div class="v" style="color:var(--acc)">${fmt(accT, 1)}<small>ha</small></div></div>
+      <div class="tile"><div class="k">ERODED</div><div class="v" style="color:var(--ero)">${fmt(eroT, 1)}<small>ha</small></div></div>
+      <div class="tile"><div class="k">NET LAND</div><div class="v" style="color:${netT < 0 ? 'var(--ero)' : 'var(--acc)'}">${signed(netT, 1)}<small>ha</small></div></div>
+      <div class="tile"><div class="k">ERODING</div><div class="v">${nEro}<small>/ ${sums.length}</small></div></div>
+    </div>
+    <div class="card"><h3><span class="n">A</span> WHICH REGIONS ARE ERODING? <button class="png" data-c="0">PNG ↓</button></h3>
+      <p class="sub">Mean shoreline change rate over the whole period (area-based, m/yr).</p>
+      <div class="cbox" style="height:${110 + 48 * sums.length}px"><canvas id="cA"></canvas></div></div>
+    <div class="card"><h3><span class="n">B</span> LAND GAINED OR LOST SINCE THE FIRST YEAR <button class="png" data-c="1">PNG ↓</button></h3>
+      <p class="sub">Cumulative change in land area (ha) for each region.</p>
+      <div class="cbox"><canvas id="cB"></canvas></div></div>
+    <div class="card"><h3><span class="n">C</span> REGION DETAIL</h3>
+      <div class="regpick" id="regPick">${sums.map((s, i) => `<button data-i="${i}" aria-pressed="${i === 0}"><i style="background:${s.region.color}"></i>${esc(s.region.name)}</button>`).join('')}</div>
+      <div id="detail"></div></div>
+    <div class="card"><h3><span class="n">D</span> SUMMARY TABLE</h3>
+      <div style="overflow:auto"><table class="t"><thead><tr><th>REGION</th><th>PERIOD</th><th>LAND START</th><th>LAND END</th><th>NET HA</th><th>M/YR</th><th>HA/YR</th><th>STATUS</th></tr></thead><tbody>
+      ${sums.map(s => `<tr><td><span style="color:${s.region.color}">●</span> ${esc(s.region.name)}</td><td>${s.first.year}–${s.last.year}</td>
+        <td class="num">${fmt(s.first.land_ha, 2)}</td><td class="num">${fmt(s.last.land_ha, 2)}</td><td class="num">${signed(s.netHa, 2)}</td>
+        <td class="num"><b>${signed(s.netRate, 2)}</b></td><td class="num">${signed(s.trend, 2)}</td>
+        <td><span class="pill ${s.status === 'Eroding' ? 'ero' : s.status === 'Accreting' ? 'acc' : 'sta'}">${s.status.toUpperCase()}</span></td></tr>`).join('')}
+      </tbody></table></div>
+      <p class="note">Status: net rate ≤ −0.5 m/yr = eroding, ≥ +0.5 m/yr = accreting, otherwise stable. HA/YR is the least-squares trend of land area.</p>
+      ${(S.warnings || []).length ? `<div class="warnline">${S.warnings.slice(0, 8).map(esc).join('<br>')}</div>` : ''}
+    </div>`;
+  el.classList.add('on');
+  $('showRes').style.display = 'none';
+  $('closeRes').onclick = () => { el.classList.remove('on'); $('showRes').style.display = 'block'; setTimeout(() => map.invalidateSize(), 50); };
+  setTimeout(() => map.invalidateSize(), 50);
+
+  const ACC = css('--acc'), ERO = css('--ero'), INK = css('--ink');
+  // A — rates by region
+  mkChart($('cA'), {type: 'bar', data: {labels: sums.map(s => s.region.name), datasets: [
+      {label: 'Erosion', data: sums.map(s => -s.eroRate), backgroundColor: ERO, borderRadius: 4},
+      {label: 'Accretion', data: sums.map(s => s.accRate), backgroundColor: ACC, borderRadius: 4},
+      {label: 'Net', data: sums.map(s => s.netRate), backgroundColor: INK, borderRadius: 4}]},
+    options: {indexAxis: 'y', maintainAspectRatio: false, plugins: {legend: {position: 'bottom'},
+      tooltip: {callbacks: {label: c => `${c.dataset.label}: ${signed(c.raw, 2)} m/yr`}}},
+      scales: {x: {title: {display: true, text: 'm / yr   (negative = erosion)'}}, y: {grid: {display: false}}}}});
+  // B — cumulative land change
+  const allYears = [...new Set(sums.flatMap(s => s.rows.map(r => r.year)))].sort((a, b) => a - b);
+  mkChart($('cB'), {type: 'line', data: {labels: allYears.map(String), datasets: sums.map(s => ({
+      label: s.region.name, borderColor: s.region.color, backgroundColor: s.region.color, borderWidth: 2.5, pointRadius: 3.5, spanGaps: true, tension: .15,
+      data: allYears.map(y => { const r = s.rows.find(x => x.year === y); return r ? r.land_ha - s.first.land_ha : null; })}))},
+    options: {maintainAspectRatio: false, plugins: {legend: {position: 'bottom'}, tooltip: {callbacks: {label: c => `${c.dataset.label}: ${signed(c.raw, 2)} ha`}}},
+      scales: {y: {title: {display: true, text: 'ha since first year'}}}}});
+  el.querySelectorAll('.png').forEach(b => b.onclick = () => {
+    const c = S.charts[+b.dataset.c];
+    downloadURL(c.toBase64Image('image/png', 1), `gondu_chart_${b.dataset.c === '0' ? 'rates' : 'cumulative'}.png`);
+  });
+  // C — detail
+  const pick = i => {
+    el.querySelectorAll('#regPick button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.i === i));
+    drawDetail(sums[i]);
+  };
+  el.querySelectorAll('#regPick button').forEach(b => b.onclick = () => pick(+b.dataset.i));
+  pick(0);
+}
+function drawDetail(s) {
+  // destroy previous detail charts (index ≥ 2)
+  S.charts.splice(2).forEach(c => c.destroy());
+  const d = $('detail'), ACC = css('--acc'), ERO = css('--ero'), INK = css('--ink'), ACCENT = css('--accent');
+  const st = s.status === 'Eroding' ? 'ero' : s.status === 'Accreting' ? 'acc' : 'sta';
+  const lowCov = s.rows.filter(r => r.validPct < 0.9).map(r => r.year);
+  d.innerHTML = `<p class="sub"><span class="pill ${st}">${s.status.toUpperCase()}</span>&nbsp; net ${signed(s.netRate, 2)} m/yr · ${signed(s.netHa, 2)} ha · mean shoreline ${fmt(s.meanLen / 1000, 2)} km · tile ${esc(s.A.tile)}</p>
+    <div class="cbox" style="height:240px"><canvas id="cC1"></canvas></div>
+    <div class="cbox" style="height:220px;margin-top:10px"><canvas id="cC2"></canvas></div>
+    <div style="overflow:auto"><table class="t"><thead><tr><th>YEAR</th><th>SCENES</th><th>COVER</th><th>THR</th><th>LAND HA</th><th>SHORE KM</th><th>ACCR</th><th>EROS</th></tr></thead><tbody>
+    ${s.rows.map(r => `<tr><td title="${esc(r.scenes.join(', '))}">${r.year}</td><td class="num">${r.scenes.length}</td>
+      <td class="num" style="${r.validPct < .9 ? 'color:var(--warn);font-weight:700' : ''}">${fmt(r.validPct * 100, 0)}%</td>
+      <td class="num">${fmt(r.thr, 2)}</td><td class="num">${fmt(r.land_ha, 2)}</td><td class="num">${fmt(r.shoreline_km, 2)}</td>
+      <td class="num">${r.accr_ha == null ? '' : fmt(r.accr_ha, 2)}</td><td class="num">${r.eros_ha == null ? '' : fmt(r.eros_ha, 2)}</td></tr>`).join('')}
+    </tbody></table></div>
+    <p class="note">Hover a year to see the scene dates used. COVER = share of the region with usable data that year.</p>
+    ${lowCov.length ? `<div class="warnline">Low data cover in ${lowCov.join(', ')} — land areas for those years may be underestimated.</div>` : ''}`;
+  const iv = s.rows.filter(r => r.accr_ha != null);
+  mkChart($('cC1'), {data: {labels: iv.map(r => `${r.from_year}–${String(r.year).slice(2)}`), datasets: [
+      {type: 'bar', label: 'Accretion', data: iv.map(r => r.accr_ha), backgroundColor: ACC, borderRadius: 3, order: 2},
+      {type: 'bar', label: 'Erosion', data: iv.map(r => -r.eros_ha), backgroundColor: ERO, borderRadius: 3, order: 2},
+      {type: 'line', label: 'Net', data: iv.map(r => r.accr_ha - r.eros_ha), borderColor: INK, backgroundColor: INK, pointRadius: 3.5, borderWidth: 2, order: 1}]},
+    options: {maintainAspectRatio: false, plugins: {legend: {position: 'bottom'}, title: {display: true, text: 'Accretion (+) and erosion (−) between composites, ha', color: INK, font: {weight: '700'}},
+      tooltip: {callbacks: {label: c => `${c.dataset.label}: ${signed(c.raw, 2)} ha`}}},
+      scales: {x: {stacked: true, grid: {display: false}}, y: {stacked: false, title: {display: true, text: 'ha'}}}}});
+  mkChart($('cC2'), {type: 'line', data: {labels: s.rows.map(r => String(r.year)), datasets: [
+      {label: 'Land area (ha)', data: s.rows.map(r => r.land_ha), borderColor: s.region.color, backgroundColor: s.region.color, pointRadius: 3, borderWidth: 2, yAxisID: 'y'},
+      {label: 'Shoreline length (km)', data: s.rows.map(r => r.shoreline_km), borderColor: ACCENT, backgroundColor: ACCENT, borderDash: [5, 4], pointRadius: 3, borderWidth: 2, yAxisID: 'y1'}]},
+    options: {maintainAspectRatio: false, plugins: {legend: {position: 'bottom'}, title: {display: true, text: 'Land area and shoreline length', color: INK, font: {weight: '700'}}},
+      scales: {y: {title: {display: true, text: 'ha'}}, y1: {position: 'right', grid: {display: false}, title: {display: true, text: 'km'}}}}});
+}
+
+// =====================================================================
+//  DOWNLOADS
+// =====================================================================
+function downloadBlob(text, name, type) {
+  const url = URL.createObjectURL(new Blob([text], {type}));
+  downloadURL(url, name);
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+function downloadURL(url, name) { const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); }
+const toLL = (A, p) => { const ll = UTM.inv(p[0], p[1], A.grid.epsg); return [+ll[0].toFixed(7), +ll[1].toFixed(7)]; };
+function shorelineGeoJSON(AN) {
+  const feats = [];
+  AN.analyses.forEach(A => A.years.forEach(Y => Y.lines.forEach(l => feats.push({type: 'Feature',
+    properties: {region: A.region.name, year: Y.year, length_m: Math.round(l.length * 10) / 10, closed: l.closed, scenes: Y.scenes.length, sensor: SENSOR[AN.cfg.sensor].label, threshold: +Y.thr.toFixed(3)},
+    geometry: {type: 'LineString', coordinates: l.utm.map(p => toLL(A, p))}}))));
+  return {type: 'FeatureCollection', features: feats};
+}
+function maskPolygons(A, bin, type, props) {
+  // trace binary mask boundaries (contour at 0.5 with zero padding) and nest holes
+  const {w, h} = A.grid, W = w + 2, H = h + 2, F = new Float32Array(W * H), allow = new Uint8Array(W * H).fill(1);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) F[(y + 1) * W + x + 1] = bin[y * w + x] ? 0 : 1;   // inside → below level
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (x === 0 || y === 0 || x === W - 1 || y === H - 1) F[y * W + x] = 1;
+  const rings = contour(F, W, H, 0.5, allow).filter(l => l.closed).map(l => {
+    const pts = l.pts.map(p => [p[0] - 1, p[1] - 1]);
+    if (pts[0][0] !== pts[pts.length - 1][0] || pts[0][1] !== pts[pts.length - 1][1]) pts.push(pts[0]);
+    return {pts, area: Math.abs(signedArea(pts))};
+  }).sort((a, b) => b.area - a.area);
+  rings.forEach((r, i) => {
+    let depth = 0, parent = null;
+    for (let j = 0; j < i; j++) if (pip(r.pts[0][0], r.pts[0][1], rings[j].pts)) { depth++; parent = rings[j]; }
+    r.hole = depth % 2 === 1; r.parent = parent;
+  });
+  const polys = rings.filter(r => !r.hole).map(r => ({outer: r, holes: rings.filter(q => q.hole && q.parent === r)}));
+  const res2 = A.grid.res * A.grid.res;
+  return polys.map(p => ({type: 'Feature',
+    properties: Object.assign({region: A.region.name, type, area_m2: Math.round((p.outer.area - p.holes.reduce((s, q) => s + q.area, 0)) * res2)}, props),
+    geometry: {type: 'Polygon', coordinates: [p.outer, ...p.holes].map(r => r.pts.map(q => toLL(A, pxToUTM(A.grid, q))))}}));
+}
+function changeGeoJSON(AN) {
+  const feats = [];
+  AN.analyses.forEach(A => {
+    if (!A.net) return;
+    const props = {from_year: A.years[0].year, to_year: A.years[A.years.length - 1].year};
+    feats.push(...maskPolygons(A, A.net.acc, 'accretion', props), ...maskPolygons(A, A.net.ero, 'erosion', props));
+  });
+  return {type: 'FeatureCollection', features: feats};
+}
+function kml(AN) {
+  const years = [...new Set(AN.analyses.flatMap(A => A.years.map(Y => Y.year)))].sort((a, b) => a - b);
+  const abgr = hex => 'ff' + hex.substr(5, 2) + hex.substr(3, 2) + hex.substr(1, 2);
+  let s = '<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>gondu. shorelines</name>\n';
+  years.forEach((y, i) => s += `<Style id="y${y}"><LineStyle><color>${abgr(rampColor(years.length > 1 ? i / (years.length - 1) : 0))}</color><width>2.5</width></LineStyle></Style>\n`);
+  AN.analyses.forEach(A => {
+    s += `<Folder><name>${esc(A.region.name)}</name>\n`;
+    A.years.forEach(Y => {
+      s += `<Folder><name>${Y.year}</name>\n`;
+      Y.lines.forEach(l => s += `<Placemark><name>${Y.year}</name><styleUrl>#y${Y.year}</styleUrl><LineString><tessellate>1</tessellate><coordinates>${l.utm.map(p => toLL(A, p).join(',')).join(' ')}</coordinates></LineString></Placemark>\n`);
+      s += '</Folder>\n';
+    });
+    s += '</Folder>\n';
+  });
+  return s + '</Document></kml>';
+}
+function csvRows(rows) { return rows.map(r => r.map(v => v == null ? '' : /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : v).join(',')).join('\n'); }
+function statsCSV(AN) {
+  const rows = [['region', 'year', 'scenes', 'scene_dates', 'data_cover_pct', 'threshold', 'land_ha', 'shoreline_km', 'from_year', 'accr_ha', 'eros_ha', 'net_ha']];
+  AN.analyses.forEach(A => A.years.forEach(Y => rows.push([A.region.name, Y.year, Y.scenes.length, Y.scenes.join(' '), (Y.validPct * 100).toFixed(1), Y.thr.toFixed(3),
+    Y.land_ha.toFixed(3), Y.shoreline_km.toFixed(3), Y.from_year, Y.accr_ha == null ? null : Y.accr_ha.toFixed(3), Y.eros_ha == null ? null : Y.eros_ha.toFixed(3), Y.net_ha == null ? null : Y.net_ha.toFixed(3)])));
+  return csvRows(rows);
+}
+function summaryCSV(AN) {
+  const rows = [['region', 'first_year', 'last_year', 'land_start_ha', 'land_end_ha', 'net_ha', 'accreted_ha', 'eroded_ha', 'mean_shoreline_km', 'net_rate_m_yr', 'accretion_rate_m_yr', 'erosion_rate_m_yr', 'trend_ha_yr', 'status']];
+  AN.sums.forEach(s => rows.push([s.region.name, s.first.year, s.last.year, s.first.land_ha.toFixed(3), s.last.land_ha.toFixed(3), s.netHa.toFixed(3), s.accHa.toFixed(3), s.eroHa.toFixed(3),
+    (s.meanLen / 1000).toFixed(3), s.netRate.toFixed(3), s.accRate.toFixed(3), s.eroRate.toFixed(3), s.trend.toFixed(3), s.status]));
+  return csvRows(rows);
+}
+function buildDownloads(AN) {
+  const cfg = AN.cfg, tag = (AN.analyses.length === 1 ? safeName(AN.analyses[0].region.name) : AN.analyses.length + '_regions') + '_' + cfg.y0 + '-' + cfg.y1;
+  const items = [
+    ['Shorelines · lines (GeoJSON)', () => downloadBlob(JSON.stringify(shorelineGeoJSON(AN)), `shorelines_${tag}.geojson`, 'application/geo+json'), 'for QGIS / ArcGIS'],
+    ['Shorelines · lines (KML)', () => downloadBlob(kml(AN), `shorelines_${tag}.kml`, 'application/vnd.google-earth.kml+xml'), 'Google Earth'],
+    ['Erosion / accretion polygons, first → last (GeoJSON)', () => downloadBlob(JSON.stringify(changeGeoJSON(AN)), `change_polygons_${tag}.geojson`, 'application/geo+json'), ''],
+    ['Statistics per region and year (CSV)', () => downloadBlob(statsCSV(AN), `shoreline_stats_${tag}.csv`, 'text/csv'), ''],
+    ['Rates summary per region (CSV)', () => downloadBlob(summaryCSV(AN), `shoreline_rates_${tag}.csv`, 'text/csv'), '']
+  ];
+  const dl = $('dl');
+  dl.innerHTML = '';
+  items.forEach(([label, fn, small]) => {
+    const b = document.createElement('button');
+    b.innerHTML = `↓ ${label}<small>${small}</small>`;
+    b.onclick = fn;
+    dl.appendChild(b);
+  });
+  const p = document.createElement('p'); p.className = 'note'; p.textContent = 'Charts can be saved as PNG from the results panel.';
+  dl.appendChild(p);
+  $('dlWrap').style.display = 'block';
+}
+
+// =====================================================================
+//  START-UP
+// =====================================================================
+(function init() {
+  if (load('theme', 'light') === 'dark') document.documentElement.dataset.theme = 'dark';
+  setSource(load('src', 'es'));
+  yearOptions();
+  const saved = load('regions', null);
+  if (saved && saved.length) { saved.forEach(r => addRegion(r.ring, r.name, true)); map.fitBounds(regionGroup.getBounds(), {padding: [30, 30]}); }
+  else { const b = PRESETS['Hulhumalé (Kaafu)']; addRegion([[b[0], b[1]], [b[2], b[1]], [b[2], b[3]], [b[0], b[3]]], 'Hulhumalé (Kaafu)', true); }
+  renderRegions(); saveRegions();
+  window.gondu = {S, UTM, contour, analyseRegion, run};   // for debugging
+})();
+</script>
+</body>
+</html>
