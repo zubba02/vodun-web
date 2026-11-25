@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>gondu. shoreline change · Maldives</title>
+<title>vodun. shoreline change · Maldives</title>
 <meta name="theme-color" content="#0c3b49">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230c3b49'/%3E%3Cg fill='none' stroke='%23a3ebe1' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M6 12c3-3 6 3 9 0s6 3 11 0'/%3E%3Cpath d='M6 18c3-3 6 3 9 0s6 3 11 0' opacity='.7'/%3E%3Cpath d='M6 24c3-3 6 3 9 0' opacity='.45'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -173,9 +173,9 @@ table.t td.num{text-align:right}
 <div class="app">
 
 <header class="bar">
-  <a class="brand" href="#" aria-label="gondu shoreline change">
+  <a class="brand" href="#" aria-label="vodun shoreline change">
     <svg class="i" viewBox="0 0 30 30" aria-hidden="true"><path d="M3 10c4-4 8 4 12 0s8 4 12 0"/><path d="M3 17c4-4 8 4 12 0s8 4 12 0" opacity=".7"/><path d="M3 24c4-4 8 4 12 0" opacity=".45"/></svg>
-    <span class="brand-lockup"><span class="brand-name">gondu<span class="brand-stop">.</span></span><span class="brand-kicker">SHORELINE CHANGE / MALDIVES</span></span>
+    <span class="brand-lockup"><span class="brand-name">vodun<span class="brand-stop">.</span></span><span class="brand-kicker">SHORELINE CHANGE / MALDIVES</span></span>
   </a>
   <div class="credit">
     <b>Erosion and accretion of islands.</b>
@@ -300,7 +300,7 @@ table.t td.num{text-align:right}
 <script>
 'use strict';
 /* =====================================================================
-   gondu. — browser-only shoreline change explorer
+   vodun. — browser-only shoreline change explorer
    Research Development Office, The Maldives National University
    ===================================================================== */
 
@@ -358,8 +358,8 @@ function rampColor(t) {
   return hexLerp(YEAR_RAMP[i], YEAR_RAMP[i + 1], x - i);
 }
 function safeName(s) { return String(s).replace(/[^A-Za-z0-9_-]+/g, '_').replace(/^_|_$/g, ''); }
-function store(k, v) { try { localStorage.setItem('gondu.' + k, JSON.stringify(v)); } catch (e) {} }
-function load(k, d) { try { const v = localStorage.getItem('gondu.' + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
+function store(k, v) { try { localStorage.setItem('vodun.' + k, JSON.stringify(v)); } catch (e) {} }
+function load(k, d) { try { const v = localStorage.getItem('vodun.' + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
 
 // ---------------- UTM (Krüger series, WGS84) ----------------
 const UTM = (() => {
@@ -567,7 +567,7 @@ $('preset').onchange = e => {
 $('saveGeo').onclick = () => {
   const fc = {type: 'FeatureCollection', features: S.regions.map(r => ({type: 'Feature', properties: {name: r.name},
     geometry: {type: 'Polygon', coordinates: [[...r.ring, r.ring[0]]]}}))};
-  downloadBlob(JSON.stringify(fc, null, 1), 'gondu_regions.geojson', 'application/geo+json');
+  downloadBlob(JSON.stringify(fc, null, 1), 'vodun_regions.geojson', 'application/geo+json');
 };
 $('loadGeo').onchange = async e => {
   const f = e.target.files[0]; if (!f) return;
@@ -1411,7 +1411,7 @@ function renderResults(AN) {
       scales: {y: {title: {display: true, text: 'ha since first year'}}}}});
   el.querySelectorAll('.png').forEach(b => b.onclick = () => {
     const c = S.charts[+b.dataset.c];
-    downloadURL(c.toBase64Image('image/png', 1), `gondu_chart_${b.dataset.c === '0' ? 'rates' : 'cumulative'}.png`);
+    downloadURL(c.toBase64Image('image/png', 1), `vodun_chart_${b.dataset.c === '0' ? 'rates' : 'cumulative'}.png`);
   });
   // C — detail
   const pick = i => {
@@ -1503,7 +1503,7 @@ function changeGeoJSON(AN) {
 function kml(AN) {
   const years = [...new Set(AN.analyses.flatMap(A => A.years.map(Y => Y.year)))].sort((a, b) => a - b);
   const abgr = hex => 'ff' + hex.substr(5, 2) + hex.substr(3, 2) + hex.substr(1, 2);
-  let s = '<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>gondu. shorelines</name>\n';
+  let s = '<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>vodun. shorelines</name>\n';
   years.forEach((y, i) => s += `<Style id="y${y}"><LineStyle><color>${abgr(rampColor(years.length > 1 ? i / (years.length - 1) : 0))}</color><width>2.5</width></LineStyle></Style>\n`);
   AN.analyses.forEach(A => {
     s += `<Folder><name>${esc(A.region.name)}</name>\n`;
@@ -1562,7 +1562,7 @@ function buildDownloads(AN) {
   if (saved && saved.length) { saved.forEach(r => addRegion(r.ring, r.name, true)); map.fitBounds(regionGroup.getBounds(), {padding: [30, 30]}); }
   else { const b = PRESETS['Hulhumalé (Kaafu)']; addRegion([[b[0], b[1]], [b[2], b[1]], [b[2], b[3]], [b[0], b[3]]], 'Hulhumalé (Kaafu)', true); }
   renderRegions(); saveRegions();
-  window.gondu = {S, UTM, contour, analyseRegion, run};   // for debugging
+  window.vodun = {S, UTM, contour, analyseRegion, run};   // for debugging
 })();
 </script>
 </body>
